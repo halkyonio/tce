@@ -153,8 +153,8 @@ popd
 ```
 Wait till the build pod is created within the default namespace and check the status ...
 ```bash
-kc -n default get workload/dev
-kc get pods -n default
+kubectl -n default get workload/dev
+kubectl get pods -n default
 
 ktree workload dev
 NAMESPACE  NAME                                 READY  REASON               AGE
@@ -169,7 +169,7 @@ default      └─SourceResolver/dev-source        True                        
 ```
 When the deployment has been created, get the URL and PORT to curl it
 ```bash
-URL=$(kc -n default get ksvc/dev -o jsonpath='{.status.url}')
+URL=$(kubectl -n default get ksvc/dev -o jsonpath='{.status.url}')
 curl $URL
 hello world
 ```
@@ -178,7 +178,6 @@ To clean up the example, simply delete it
 kapp delete -a example
 kapp delete -a supplychain
 ```
-
 
 ## Install, upgrade needed tools (optional)
 
