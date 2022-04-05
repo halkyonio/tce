@@ -217,23 +217,9 @@ packages[6,0]="cartographer"
 packages[6,1]="cartographer.community.tanzu.vmware.com"
 packages[6,2]=""
 
-packages[7,0]="harbor"
-packages[7,1]="harbor.community.tanzu.vmware.com"
+packages[7,0]="k8s-ui"
+packages[7,1]="kubernetes-dashboard.halkyonio.io"
 packages[7,2]="YES"
-cat <<EOF > $TCE_DIR/values-harbor.yml
-namespace: harbor
-hostname: harbor.$VM_IP.nip.io
-port:
-  https: 443
-logLevel: info
-enableContourHttpProxy: true
-tlsCertificateSecretName: harbor-tls
-harborAdminPassword: Fs00ZXXiE2t2grxX
-EOF
-
-packages[8,0]="k8s-ui"
-packages[8,1]="kubernetes-dashboard.halkyonio.io"
-packages[8,2]="YES"
 cat <<EOF > $TCE_DIR/values-k8s-ui.yml
 vm_ip: $VM_IP
 EOF
@@ -251,21 +237,6 @@ for ((i=1;i<=8;i++)) do
           tanzu package install ${packages[$i,0]} --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE --wait=false
         fi
 done
-
-log_line "YELLOW" "Execute some additional stuffs for Harbor"
-kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
-
-HARBOR_PWD_STR=$(cat $TCE_DIR/values-harbor.yml | grep harborAdminPassword)
-IFS=': ' && read -a strarr <<< $HARBOR_PWD_STR
-HARBOR_PWD=${strarr[1]}
-log "YELLOW" "Harbor URL: https://harbor.$VM_IP.nip.io and admin password: $HARBOR_PWD"
-
-log_line "YELLOW" "To push/pull images from the Harbor registry, create a secret and configure the imgPullSecret of the service account"
-log_line "YELLOW" "kubectl -n <NAMESPACE> create secret docker-registry regcred \""
-log_line "YELLOW" "    --docker-server=harbor.<IP>.nip.io \""
-log_line "YELLOW" "    --docker-username=admin \""
-log_line "YELLOW" "    --docker-password=<HARBOR_PWD>"
-log_line "YELLOW" "kubectl patch serviceaccount default -n <NAMESPACE> -p '{"imagePullSecrets": [{"name": "regcred"}]}'"
 
 log "YELLOW" "Kubernetes URL: https://k8s-ui.$VM_IP.nip.io"
 K8S_UI_TOKEN=$(kubectl get secret $(kubectl get serviceaccount dashboard -n kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" -n kubernetes-dashboard | base64 --decode)
