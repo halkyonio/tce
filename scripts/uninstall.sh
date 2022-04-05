@@ -46,14 +46,11 @@ CLUSTER_NAME=${CLUSTER_NAME:-toto}
 
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
-#log "YELLOW" "Removing the k8s-ui release from helm"
-#helm uninstall k8s-ui -n kubernetes-dashboard
-
 log "YELLOW" "Deleting the TCE cluster $CLUSTER_NAME"
 tanzu uc delete $CLUSTER_NAME
 
 log "YELLOW" "Uninstall the Tanzu CLI"
-~/.local/share/tce/uninstall.sh
+$REMOTE_HOME_DIR/.local/share/tce/uninstall.sh
 
 log "YELLOW" "Remove downloaded files"
 rm -rf $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION/
