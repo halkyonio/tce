@@ -27,7 +27,7 @@ References:
 
 ### All in one
 
-Use the following bash script to perform the following operations:
+Use the following bash [script](scripts/install.sh) to perform the following operations:
 
 - Install the tanzu client 
 - Create an [unmanaged](https://tanzucommunityedition.io/docs/v0.11/getting-started-unmanaged/#getting-started-with-unmanaged-clusters) kubernetes cluster 
@@ -38,7 +38,7 @@ Use the following bash script to perform the following operations:
   - FluxCD, 
   - Harbor
 
-Execute this [script](scripts/install.sh) where you will first set the following variables:
+Execute this `install.sh` where you will first set the following variables:
 
 - **REMOTE_HOME_DIR**: home directory where files will be installed within the remote VM
 - **VM_IP**: IP address of the VM where the cluster is running
