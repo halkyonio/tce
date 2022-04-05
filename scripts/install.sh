@@ -91,11 +91,11 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
 
 SECONDS=0
 
-log "CYAN" "Populate a self signed certificate for "
+log "CYAN" "Populate a self signed certificate ..."
 mkdir -p $TCE_DIR/certs/${REG_SERVER}
+mkdir -p /etc/docker/certs.d/${REG_SERVER}
 
 log "CYAN" "Generate the openssl stuff"
-TCE_DIR=$HOME/tce
 
 # Generate a CA certificate private key.
 #openssl genrsa -out $TCE_DIR/certs/ca.key 4096
@@ -138,7 +138,6 @@ TCE_DIR=$HOME/tce
 # cp $TCE_DIR/certs/ca.crt $TCE_DIR/certs/${REG_SERVER}
 # cp $TCE_DIR/certs/tls.crt $TCE_DIR/certs/${REG_SERVER}
 # cp $TCE_DIR/certs/tls.key $TCE_DIR/certs/${REG_SERVER}
-
 
 create_openssl_cfg > $TCE_DIR/certs/req.cnf
 
