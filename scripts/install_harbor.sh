@@ -57,9 +57,9 @@ echo "Installing $PKG_NAME - $PKG_FQNAME - $PKG_VERSION"
 tanzu package install $PKG_NAME --package-name $PKG_FQNAME --version $PKG_VERSION -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yml --wait=false
 
 log_line "YELLOW" "Execute some additional stuffs for Harbor"
+imgpkg pull -b projects.registry.vmware.com/tce/harbor -o $TCE_DIR/harbor
 $TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
 head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
-
 
 log_line "YELLOW" "Execute some additional stuffs for Harbor"
 kubectl create -n harbor secret generic harbor-tls \
