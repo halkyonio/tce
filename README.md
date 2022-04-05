@@ -1,8 +1,5 @@
 # Tanzu Community Edition
 
-Table of Contents
-=================
-
 * [Introduction](#introduction)
 * [TCE installation](#tce-installation)
   * [All in one](#all-in-one)
