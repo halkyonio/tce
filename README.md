@@ -40,14 +40,26 @@ Use the following bash [script](scripts/install.sh) to perform the following ope
 
 Execute this `install.sh` where you will first set the following variables:
 
-- **REMOTE_HOME_DIR**: home directory where files will be installed within the remote VM
-- **VM_IP**: IP address of the VM where the cluster is running
+- **REMOTE_HOME_DIR**: home directory where files will be installed locally or within the remote VM
+- **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
 - **CLUSTER_NAME**: TCE Kind cluster name
-- **REMOTE_HOME_DIR**: Remote home dir where the script is executed
 - **TCE_VERSION**: Version of the Tanzu client to be installed. E.g. v0.11.0
 
 ```bash
+REMOTE_HOME_DIR="$HOME" \
+VM_IP="127.0.0.1" \
+CLUSTER_NAME="toto" \
+TCE_VERSION="v0.11.0" \
 ./scripts/install.sh
+
+or for remote deployment
+
+ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
+    REMOTE_HOME_DIR="/home/centos" \
+    VM_IP=${IP} \
+    CLUSTER_NAME="toto" \
+    TCE_VERSION="v0.11.0" \
+    "bash -s" -- < ./scripts/install.sh
 ```
 
 **REMARK**: To uninstall it, use the command `./scripts/uninstall.sh`

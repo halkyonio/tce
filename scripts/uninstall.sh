@@ -32,8 +32,9 @@ log() {
   echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
 }
 
-KUBE_CFG_FILE=${1:-config}
+KUBE_CFG_FILE=${KUBE_CFG_FILE:-config}
 CLUSTER_NAME=${CLUSTER_NAME:-toto}
+
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
 #log "YELLOW" "Removing the k8s-ui release from helm"
