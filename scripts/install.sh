@@ -110,49 +110,6 @@ mkdir -p $TCE_DIR/certs/${REG_SERVER}
 sudo mkdir -p /etc/docker/certs.d/${REG_SERVER}
 
 log "CYAN" "Generate the openssl stuff"
-
-# Generate a CA certificate private key.
-#openssl genrsa -out $TCE_DIR/certs/ca.key 4096
-
-# Generate the CA certificate.
-#openssl req -x509 -new -nodes -sha512 -days 3650 \
-# -subj "/C=CN/ST=Namur/L=Florennes/O=Red Hat/OU=Snowdrop/CN=harbor.65.108.148.216.nip.io" \
-# -key $TCE_DIR/certs/ca.key \
-# -out $TCE_DIR/certs/ca.crt
-
-# Generate a Server Certificate
-#openssl genrsa -out tls.key 4096
-#openssl req -sha512 -new \
-#    -subj "/C=CN/ST=Namur/L=Florennes/O=Red Hat/OU=Snowdrop/CN=harbor.65.108.148.216.nip.io" \
-#    -key $TCE_DIR/certs/tls.key \
-#    -out $TCE_DIR/certs/tls.csr
-
-# Generate an x509 v3 extension file.
-# cat > $TCE_DIR/certs/v3.ext <<-EOF
-# basicConstraints        = critical, CA:TRUE
-# subjectKeyIdentifier    = hash
-# authorityKeyIdentifier  = keyid:always, issuer:always
-# keyUsage                = critical, cRLSign, digitalSignature, keyCertSign
-# nsComment               = "OpenSSL Generated Certificate"
-# subjectAltName          = @alt_names
-#
-#[alt_names]
-#DNS.1=harbor.65.108.148.216.nip.io
-#DNS.2=notary.harbor.65.108.148.216.nip.io
-#EOF
-
-# Use the v3.ext file to generate a certificate for your Harbor host.
-#openssl x509 -req -sha512 -days 3650 \
-#    -extfile $TCE_DIR/certs/v3.ext \
-#    -CA $TCE_DIR/certs/ca.crt -CAkey $TCE_DIR/certs/ca.key -CAcreateserial \
-#    -in $TCE_DIR/certs/tls.csr \
-#    -out $TCE_DIR/certs/tls.crt
-
-# mkdir -p $TCE_DIR/certs/${REG_SERVER}
-# cp $TCE_DIR/certs/ca.crt $TCE_DIR/certs/${REG_SERVER}
-# cp $TCE_DIR/certs/tls.crt $TCE_DIR/certs/${REG_SERVER}
-# cp $TCE_DIR/certs/tls.key $TCE_DIR/certs/${REG_SERVER}
-
 create_openssl_cfg > $TCE_DIR/certs/req.cnf
 
 log "CYAN" "Create the self signed certificate certificate and client key files"
@@ -214,17 +171,11 @@ EOF
 log "CYAN" "Create the $CLUSTER_NAME TCE cluster"
 tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 
-#log "CYAN" "Check the latest image available of the repo for $TCE_VERSION "
-#REPO_VERSION=$(crane ls projects.registry.vmware.com/tce/main | grep $TCE_VERSION | tail -1)
-#log "CYAN" "Update the repository to get the latest packages"
-#tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:$REPO_VERSION -n $TCE_PACKAGES_NAMESPACE
-
 log "CYAN" "Install our demo repository containing the kubernetes dashboard package"
 tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
 
 log "CYAN" "Create the different needed namespaces: tce, harbor, kubernetes-dashboard"
 kubectl create ns harbor
-kubectl create ns kubernetes-dashboard
 
 log "CYAN" "Got the latest version of the packages to be installed ..."
 declare -A packages
@@ -293,9 +244,9 @@ for ((i=1;i<=${#packages[@]};i++)) do
         packages[$i,3]=$PKG_VERSION
         echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,3]}"
         if [ "${packages[$i,2]}" = "YES" ]; then
-          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml --wait=false
+          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml --wait=false
         else
-          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false
+          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE --wait=false
         fi
 done
 
