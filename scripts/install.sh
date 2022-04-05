@@ -229,9 +229,9 @@ for ((i=1;i<=7;i++)) do
         packages[$i,3]=$PKG_VERSION
         echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,3]}"
         if [ "${packages[$i,2]}" = "YES" ]; then
-          tanzu package install ${packages[$i,0]} --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yml --wait=false
+          tanzu package install ${packages[$i,0]} --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yml
         else
-          tanzu package install ${packages[$i,0]} --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE --wait=false
+          tanzu package install ${packages[$i,0]} --package-name ${packages[$i,1]} --version ${packages[$i,3]} -n $TCE_PACKAGES_NAMESPACE
         fi
 done
 
