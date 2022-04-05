@@ -228,7 +228,7 @@ enableContourHttpProxy: true
 tlsCertificateSecretName: harbor-tls
 EOF
 
-packages[6,0]="my-dashboard"
+packages[6,0]="k8s-ui"
 packages[6,1]="kubernetes-dashboard.halkyonio.io"
 packages[6,2]="YES"
 cat <<EOF > $TCE_DIR/k8s-ui-values.yml
