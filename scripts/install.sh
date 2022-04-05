@@ -228,6 +228,7 @@ port:
 logLevel: info
 enableContourHttpProxy: true
 tlsCertificateSecretName: harbor-tls
+harborAdminPassword: Fs00ZXXiE2t2grxX
 EOF
 
 packages[8,0]="k8s-ui"
@@ -252,8 +253,6 @@ for ((i=1;i<=8;i++)) do
 done
 
 log_line "YELLOW" "Execute some additional stuffs for Harbor"
-$TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
-head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
 kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
 
 HARBOR_PWD_STR=$(cat $TCE_DIR/values-harbor.yml | grep harborAdminPassword)
