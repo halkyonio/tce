@@ -93,7 +93,7 @@ SECONDS=0
 
 log "CYAN" "Populate a self signed certificate ..."
 mkdir -p $TCE_DIR/certs/${REG_SERVER}
-mkdir -p /etc/docker/certs.d/${REG_SERVER}
+sudo mkdir -p /etc/docker/certs.d/${REG_SERVER}
 
 log "CYAN" "Generate the openssl stuff"
 
