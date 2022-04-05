@@ -22,9 +22,10 @@ KUBE_CFG=${KUBE_CFG:=config}
 VM_IP=${VM_IP:=127.0.0.1}
 CLUSTER_NAME=${CLUSTER_NAME:=toto}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
-TCE_VERSION=${TCE_VERSION:-v0.11.0}
 
+TCE_VERSION=${TCE_VERSION:-v0.11.0}
 TCE_DIR=$REMOTE_HOME_DIR/tce
+TCE_PACKAGES_NAMESPACE="tanzu-package-repo-global"
 
 REG_SERVER=harbor.$VM_IP.nip.io
 
@@ -210,10 +211,10 @@ EOF
 log "CYAN" "Create the $CLUSTER_NAME TCE cluster"
 tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 
-log "CYAN" "Check the latest image available of the repo for $TCE_VERSION "
-REPO_VERSION=$(crane ls projects.registry.vmware.com/tce/main | grep $TCE_VERSION | tail -1)
-log "CYAN" "Update the repository to get the latest packages"
-tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:$REPO_VERSION --namespace tanzu-package-repo-global
+#log "CYAN" "Check the latest image available of the repo for $TCE_VERSION "
+#REPO_VERSION=$(crane ls projects.registry.vmware.com/tce/main | grep $TCE_VERSION | tail -1)
+#log "CYAN" "Update the repository to get the latest packages"
+#tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:$REPO_VERSION -n $TCE_PACKAGES_NAMESPACE
 
 log "CYAN" "Create the different needed namespaces: tce, harbor, kubernetes-dashboard"
 kubectl create ns tce
@@ -226,7 +227,7 @@ log "CYAN" "Fluxcd installation ..."
 flux install --namespace=flux-system --network-policy=false --components=source-controller
 
 log "CYAN" "Cert manager installation ..."
-tanzu package install cert-manager --package-name cert-manager.community.tanzu.vmware.com --version 1.6.1 -n tce --wait=false
+tanzu package install cert-manager --package-name cert-manager.community.tanzu.vmware.com --version 1.6.1 -n $TCE_PACKAGES_NAMESPACE --wait=false
 
 log "CYAN" "Contour installation ..."
 cat <<EOF > $TCE_DIR/values-contour.yaml
@@ -236,7 +237,7 @@ envoy:
   hostPorts:
     enable: true
 EOF
-tanzu package install contour --package-name contour.community.tanzu.vmware.com --version 1.20.1 -f $TCE_DIR/values-contour.yaml --wait=false
+tanzu package install contour --package-name contour.community.tanzu.vmware.com --version 1.20.1 -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-contour.yaml --wait=false
 
 log "CYAN" "Knative installation ..."
 cat <<EOF > $TCE_DIR/values-knative.yml
@@ -244,13 +245,13 @@ domain:
   type: real
   name: $VM_IP.nip.io
 EOF
-tanzu package install knative --package-name knative-serving.community.tanzu.vmware.com --version 1.0.0 -f $TCE_DIR/values-knative.yml --wait=false
+tanzu package install knative --package-name knative-serving.community.tanzu.vmware.com --version 1.0.0 -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-knative.yml --wait=false
 
 log "CYAN" "Kpack installation ..."
-tanzu package install kpack --package-name kpack.community.tanzu.vmware.com --version 0.5.1 --wait=false
+tanzu package install kpack --package-name kpack.community.tanzu.vmware.com --version 0.5.1 -n $TCE_PACKAGES_NAMESPACE --wait=false
 
 log "CYAN" "Cartographer installation ..."
-tanzu package install cartographer --package-name cartographer.community.tanzu.vmware.com --version 0.2.2 --wait=false
+tanzu package install cartographer --package-name cartographer.community.tanzu.vmware.com -n $TCE_PACKAGES_NAMESPACE --version 0.2.2 --wait=false
 
 log "CYAN" "Harbor installation ..."
 cat <<EOF > $TCE_DIR/values-harbor.yml
@@ -267,7 +268,7 @@ $TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.y
 head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
 
 kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
-tanzu package install harbor --package-name harbor.community.tanzu.vmware.com --version 2.3.3 -n harbor --values-file $TCE_DIR/values-harbor.yml
+tanzu package install harbor --package-name harbor.community.tanzu.vmware.com --version 2.3.3 -n $TCE_PACKAGES_NAMESPACE --values-file $TCE_DIR/values-harbor.yml
 
 log_line "YELLOW" "Deploying the Kubeapps Catalog UI"
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -282,40 +283,6 @@ packaging:
 featureFlags:
   operators: true
 EOF
-
-helm install kubeapps -n kubeapps bitnami/kubeapps -f kubeapps-values.yml
-cat <<EOF | kubectl apply -f -
-apiVersion: projectcontour.io/v1
-kind: HTTPProxy
-metadata:
-  name: kubeapps-grpc
-  namespace: kubeapps
-spec:
-  virtualhost:
-    fqdn: kubeapps.$VM_IP.nip.io
-  routes:
-    - conditions:
-      - prefix: /apis/
-      pathRewritePolicy:
-        replacePrefix:
-        - replacement: /
-      services:
-      - name: kubeapps-internal-kubeappsapis
-        port: 8080
-        protocol: h2c
-    - services:
-      - name: kubeapps
-        port: 80
-EOF
-kubectl create --namespace default serviceaccount kubeapps-operator
-kubectl create clusterrolebinding kubeapps-operator --clusterrole=cluster-admin --serviceaccount=default:kubeapps-operator
-kubectl create clusterrolebinding kubeapps-operator-cluster-admin --clusterrole=cluster-admin --serviceaccount kubeapps:kubeapps-operator
-KUBEAPPS_TOKEN=$(kubectl get --namespace default secret $(kubectl get --namespace default serviceaccount kubeapps-operator -o jsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep kubeapps-operator-token) -o jsonpath='{.data.token}' -o go-template='{{.data.token | base64decode}}')
-log_line "YELLOW" "Kubeapps TOKEN: $KUBEAPPS_TOKEN"
-log_line "YELLOW" "Install OLM if not yet done !!"
-log_line "YELLOW" "curl -L https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.20.0/install.sh -o install.sh"
-log_line "YELLOW" "chmod +x install.sh"
-log_line "YELLOW" "./install.sh v0.20.0"
 
 log "CYAN" "Kubernetes dashboard installation ..."
 cat <<EOF > $TCE_DIR/k8s-ui-values.yml
