@@ -32,11 +32,14 @@ Use the following bash [script](scripts/install.sh) to perform the following ope
 - Install the tanzu client 
 - Create an [unmanaged](https://tanzucommunityedition.io/docs/v0.11/getting-started-unmanaged/#getting-started-with-unmanaged-clusters) kubernetes cluster 
 - Deploy some cool packages able to demo a GitOps scenario such as:
+  - Certificate manager,
+  - Kpack,
   - Knative, 
   - Contour, 
   - Cartographer, 
   - FluxCD, 
-  - Harbor
+  - Kubernetes dashboard
+  - Harbor (optional)
 
 Execute this `install.sh` where you will first set the following variables:
 
