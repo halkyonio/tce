@@ -42,3 +42,6 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
 log "YELLOW" "Deleting the TCE cluster $CLUSTER_NAME"
 tanzu uc delete $CLUSTER_NAME
+
+log "YELLOW" "Uninstall the Tanzu CLI"
+~/.local/share/tce/uninstall.sh

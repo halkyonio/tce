@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 #
+# This script requires: curl, grep, sed, tr, and jq in order to work
+#
 # Execute this command locally
 #
 # ./install.sh
 #
 # Example:
-# VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/uninstall.sh
+# VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/install.sh
 #
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
@@ -90,6 +92,14 @@ log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
 
 SECONDS=0
+
+log "CYAN" "Install the tanzu client for version: $TCE_VERSION"
+curl -H "Accept: application/vnd.github.v3.raw" \
+    -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | \
+    bash -s $TCE_TCE_VERSION linux
+tar xzvf tce-linux-amd64-$TCE_VERSION.tar.gz && cd tce-linux-amd64-$TCE_VERSION
+./install.sh
+cd ..
 
 log "CYAN" "Populate a self signed certificate ..."
 mkdir -p $TCE_DIR/certs/${REG_SERVER}
