@@ -2,10 +2,10 @@
 #
 # Execute this command locally
 #
-# ./install_tce.sh
+# ./install.sh
 #
 # Example:
-# VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/uninstall_tce.sh
+# VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/uninstall.sh
 #
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM

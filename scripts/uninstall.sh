@@ -2,7 +2,7 @@
 #
 # Execute this command locally
 #
-# ./uninstall_tce.sh
+# ./uninstall.sh
 
 set -e
 

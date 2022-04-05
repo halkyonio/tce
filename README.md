@@ -30,7 +30,7 @@ References:
 Use the following bash script to install TCE tools and packages such as: Knative, Contour, cartographer, fluxCD, Harbor, ... 
 
 ```bash
-./scripts/tce/install_tce.sh
+./scripts/tce/install.sh
 ```
 
 **REMARK**: To uninstall it, use `./scripts/tce/uninstall_tce.sh`
