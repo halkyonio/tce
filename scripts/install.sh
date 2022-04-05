@@ -102,6 +102,9 @@ mv tce-linux-amd64-$TCE_VERSION.tar.gz $TCE_DIR
 tar xzvf $TCE_DIR/tce-linux-amd64-$TCE_VERSION.tar.gz -C $TCE_DIR/
 $TCE_DIR/tce-linux-amd64-$TCE_VERSION/install.sh
 
+mkdir -p $REMOTE_HOME_DIR/.tanzu
+tanzu completion bash >  $REMOTE_HOME_DIR/.tanzu/completion.bash.inc
+
 log "CYAN" "Populate a self signed certificate ..."
 mkdir -p $TCE_DIR/certs/${REG_SERVER}
 sudo mkdir -p /etc/docker/certs.d/${REG_SERVER}
@@ -216,20 +219,24 @@ tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 #log "CYAN" "Update the repository to get the latest packages"
 #tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:$REPO_VERSION -n $TCE_PACKAGES_NAMESPACE
 
+
 log "CYAN" "Create the different needed namespaces: tce, harbor, kubernetes-dashboard"
-kubectl create ns tce
 kubectl create ns harbor
 kubectl create ns kubernetes-dashboard
 
-log "CYAN" "Install and configure the different packages"
+log "CYAN" "Got the latest version of the packages to be installed ..."
+declare -A packages
+packages[0,0]="cert-manager"
+packages[0,1]="cert-manager.community.tanzu.vmware.com"
+packages[0,2]=""
 
-log "CYAN" "Fluxcd installation ..."
-flux install --namespace=flux-system --network-policy=false --components=source-controller
+packages[1,0]="fluxcd"
+packages[1,1]="fluxcd-source-controller.community.tanzu.vmware.com"
+packages[1,2]=""
 
-log "CYAN" "Cert manager installation ..."
-tanzu package install cert-manager --package-name cert-manager.community.tanzu.vmware.com --version 1.6.1 -n $TCE_PACKAGES_NAMESPACE --wait=false
-
-log "CYAN" "Contour installation ..."
+packages[2,0]="contour"
+packages[2,1]="contour.community.tanzu.vmware.com"
+packages[2,2]="YES"
 cat <<EOF > $TCE_DIR/values-contour.yaml
 envoy:
   service:
@@ -237,22 +244,27 @@ envoy:
   hostPorts:
     enable: true
 EOF
-tanzu package install contour --package-name contour.community.tanzu.vmware.com --version 1.20.1 -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-contour.yaml --wait=false
 
-log "CYAN" "Knative installation ..."
+packages[3,0]="knative"
+packages[3,1]="knative-serving.community.tanzu.vmware.com"
+packages[3,2]="YES"
 cat <<EOF > $TCE_DIR/values-knative.yml
 domain:
   type: real
   name: $VM_IP.nip.io
 EOF
-tanzu package install knative --package-name knative-serving.community.tanzu.vmware.com --version 1.0.0 -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-knative.yml --wait=false
 
-log "CYAN" "Kpack installation ..."
-tanzu package install kpack --package-name kpack.community.tanzu.vmware.com --version 0.5.1 -n $TCE_PACKAGES_NAMESPACE --wait=false
+packages[4,0]="kpack"
+packages[4,1]="kpack.community.tanzu.vmware.com"
+packages[4,2]=""
 
-log "CYAN" "Cartographer installation ..."
-tanzu package install cartographer --package-name cartographer.community.tanzu.vmware.com -n $TCE_PACKAGES_NAMESPACE --version 0.2.2 --wait=false
+packages[5,0]="cartographer"
+packages[5,1]="cartographer.community.tanzu.vmware.com"
+packages[5,2]=""
 
+packages[5,0]="harbor"
+packages[5,1]="harbor.community.tanzu.vmware.com"
+packages[5,2]="YES"
 log "CYAN" "Harbor installation ..."
 cat <<EOF > $TCE_DIR/values-harbor.yml
 namespace: harbor
@@ -264,11 +276,24 @@ enableContourHttpProxy: true
 tlsCertificateSecretName: harbor-tls
 EOF
 
-$TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
-head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
+for ((i=0;i<=4;i++)) do
+        PKG_NAME=${packages[$i,1]}
+        jsonBody=`tanzu package available list -o json`
+        PKG_VERSION=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."latest-version"'`
+        PKG_SHORT_NAME=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."display-name"'`
+        packages[$i,2]=$PKG_VERSION
+        echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,2]}"
+        if (${packages[$i,3]} = ""); then
+          echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false"
+        else
+          echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml"
+        fi
+done
 
-kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
-tanzu package install harbor --package-name harbor.community.tanzu.vmware.com --version 2.3.3 -n $TCE_PACKAGES_NAMESPACE --values-file $TCE_DIR/values-harbor.yml
+#log_line "YELLOW" "additional stuff for Harbor"
+#$TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
+#head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
+#kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
 
 log_line "YELLOW" "Deploying the Kubeapps Catalog UI"
 helm repo add bitnami https://charts.bitnami.com/bitnami
