@@ -93,7 +93,7 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
 
 SECONDS=0
 
-log "CYAN" "Install the tanzu client for version: $TCE_VERSION"
+log "CYAN" "Install the tanzu client version: $TCE_VERSION"
 curl -H "Accept: application/vnd.github.v3.raw" \
     -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | \
     bash -s $TCE_VERSION linux
