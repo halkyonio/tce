@@ -283,7 +283,7 @@ for ((i=0;i<=4;i++)) do
         PKG_SHORT_NAME=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."display-name"'`
         packages[$i,2]=$PKG_VERSION
         echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,2]}"
-        if (${packages[$i,3]} = ""); then
+        if [ ${packages[$i,3]} = "" ]; then
           echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false"
         else
           echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml"
