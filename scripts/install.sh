@@ -25,7 +25,7 @@ REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 
 TCE_VERSION=${TCE_VERSION:-v0.11.0}
 TCE_DIR=$REMOTE_HOME_DIR/tce
-TCE_PACKAGES_NAMESPACE="tanzu-package-repo-global"
+TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
 
 REG_SERVER=harbor.$VM_IP.nip.io
 
