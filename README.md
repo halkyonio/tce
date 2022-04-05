@@ -44,12 +44,14 @@ Execute this `install.sh` where you will first set the following variables:
 - **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
 - **CLUSTER_NAME**: TCE Kind cluster name
 - **TCE_VERSION**: Version of the Tanzu client to be installed. E.g. v0.11.0
+- **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
 
 ```bash
 REMOTE_HOME_DIR="$HOME" \
 VM_IP="127.0.0.1" \
 CLUSTER_NAME="toto" \
 TCE_VERSION="v0.11.0" \
+TKR_VERSION="v0.21.2" \
 ./scripts/install.sh
 
 or for remote deployment
@@ -59,6 +61,7 @@ ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
     VM_IP=${IP} \
     CLUSTER_NAME="toto" \
     TCE_VERSION="v0.11.0" \
+    TKR_VERSION="v0.21.2" \
     "bash -s" -- < ./scripts/install.sh
 ```
 

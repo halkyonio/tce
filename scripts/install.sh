@@ -15,6 +15,7 @@
 # - CLUSTER_NAME: TCE Kind cluster name
 # - REMOTE_HOME_DIR: Remote home dir where the script is executed
 # - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.11.0
+# - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
 #
 set -e
 
@@ -24,6 +25,7 @@ CLUSTER_NAME=${CLUSTER_NAME:=toto}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 
 TCE_VERSION=${TCE_VERSION:-v0.11.0}
+TKR_VERSION=${TKR_VERSION:-v1.22.5}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
 
@@ -161,7 +163,7 @@ Cni: calico
 CniConfiguration: {}
 PodCidr: 10.244.0.0/16
 ServiceCidr: 10.96.0.0/16
-TkrLocation: projects.registry.vmware.com/tce/tkr:v1.21.5
+TkrLocation: projects.registry.vmware.com/tce/tkr:$TKR_VERSION
 PortsToForward: []
 SkipPreflight: false
 ControlPlaneNodeCount: "1"
