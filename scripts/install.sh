@@ -228,17 +228,17 @@ kubectl create ns kubernetes-dashboard
 
 log "CYAN" "Got the latest version of the packages to be installed ..."
 declare -A packages
-packages[0,0]="cert-manager"
-packages[0,1]="cert-manager.community.tanzu.vmware.com"
-packages[0,2]=""
-
-packages[1,0]="fluxcd"
-packages[1,1]="fluxcd-source-controller.community.tanzu.vmware.com"
+packages[1,0]="cert-manager"
+packages[1,1]="cert-manager.community.tanzu.vmware.com"
 packages[1,2]=""
 
-packages[2,0]="contour"
-packages[2,1]="contour.community.tanzu.vmware.com"
-packages[2,2]="YES"
+packages[2,0]="fluxcd"
+packages[2,1]="fluxcd-source-controller.community.tanzu.vmware.com"
+packages[2,2]=""
+
+packages[3,0]="contour"
+packages[3,1]="contour.community.tanzu.vmware.com"
+packages[3,2]="YES"
 cat <<EOF > $TCE_DIR/values-contour.yaml
 envoy:
   service:
@@ -247,26 +247,26 @@ envoy:
     enable: true
 EOF
 
-packages[3,0]="knative"
-packages[3,1]="knative-serving.community.tanzu.vmware.com"
-packages[3,2]="YES"
+packages[4,0]="knative"
+packages[4,1]="knative-serving.community.tanzu.vmware.com"
+packages[4,2]="YES"
 cat <<EOF > $TCE_DIR/values-knative.yml
 domain:
   type: real
   name: $VM_IP.nip.io
 EOF
 
-packages[4,0]="kpack"
-packages[4,1]="kpack.community.tanzu.vmware.com"
-packages[4,2]=""
-
-packages[5,0]="cartographer"
-packages[5,1]="cartographer.community.tanzu.vmware.com"
+packages[5,0]="kpack"
+packages[5,1]="kpack.community.tanzu.vmware.com"
 packages[5,2]=""
 
-packages[5,0]="harbor"
-packages[5,1]="harbor.community.tanzu.vmware.com"
-packages[5,2]="YES"
+packages[6,0]="cartographer"
+packages[6,1]="cartographer.community.tanzu.vmware.com"
+packages[6,2]=""
+
+packages[7,0]="harbor"
+packages[7,1]="harbor.community.tanzu.vmware.com"
+packages[7,2]="YES"
 log "CYAN" "Harbor installation ..."
 cat <<EOF > $TCE_DIR/values-harbor.yml
 namespace: harbor
@@ -285,17 +285,17 @@ cat <<EOF > $TCE_DIR/k8s-ui-values.yml
 vm_ip: $VM_IP
 EOF
 
-for ((i=0;i<=4;i++)) do
+for ((i=1;i<=${#packages[@]};i++)) do
         PKG_NAME=${packages[$i,1]}
         jsonBody=`tanzu package available list -o json`
         PKG_VERSION=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."latest-version"'`
         PKG_SHORT_NAME=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."display-name"'`
-        packages[$i,2]=$PKG_VERSION
-        echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,2]}"
-        if [ "${packages[$i,3]}" = "" ]; then
-          echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false"
+        packages[$i,3]=$PKG_VERSION
+        echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,3]}"
+        if [ "${packages[$i,2]}" = "" ]; then
+          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false
         else
-          echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml"
+          tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml
         fi
 done
 
