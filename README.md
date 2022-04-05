@@ -1,13 +1,14 @@
-# Scenario and steps followed to evaluate TCE
+# Tanzu Community Edition
 
 Table of Contents
 =================
 
 * [Introduction](#introduction)
-* [TCE installation - all in one](#tce-installation---all-in-one)
 * [TCE installation](#tce-installation)
-    * [Create a K8s cluster](#create-a-k8s-cluster)
-    * [Configure/install the needed packages](#configureinstall-the-needed-packages)
+  * [All in one](#all-in-one)
+  * [Manual steps](#manual-steps)
+  * [Create a K8s cluster](#create-a-k8s-cluster)
+  * [Configure/install the needed packages](#configureinstall-the-needed-packages)
 * [Demo](#demo)
 * [Install, upgrade needed tools (optional)](#install-upgrade-needed-tools-optional)
 * [Install the K8s dashboard (optional)](#install-the-k8s-dashboard-optional)
@@ -25,7 +26,9 @@ References:
 
 - Doc: https://tanzucommunityedition.io/
 
-## TCE installation - all in one
+## TCE installation 
+
+### All in one
 
 Use the following bash script to perform the following operations:
 
@@ -52,7 +55,7 @@ Execute this [script](scripts/install.sh) where you will first set the following
 
 **REMARK**: To uninstall it, use the command `./scripts/uninstall.sh`
 
-## TCE installation
+### Manual steps
 
 Install TCE and download a version `>= 0.11` or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build) as it supports to install now: cartographer, kpack
 and more will come soon: FluxCD, kubeapps, ...
