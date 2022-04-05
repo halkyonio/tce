@@ -290,83 +290,10 @@ for ((i=0;i<=4;i++)) do
         fi
 done
 
-#log_line "YELLOW" "additional stuff for Harbor"
-#$TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
-#head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
-#kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
-
-log_line "YELLOW" "Deploying the Kubeapps Catalog UI"
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm uninstall kubeapps -n kubeapps
-
-cat <<EOF > kubeapps-values.yml
-image:
-  tag:
-packaging:
-  carvel:
-    enabled: true
-featureFlags:
-  operators: true
-EOF
-
-log "CYAN" "Kubernetes dashboard installation ..."
-cat <<EOF > $TCE_DIR/k8s-ui-values.yml
-ingress:
-  enabled: true
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-staging
-    projectcontour.io/ingress.class: contour
-  hosts:
-  - k8s-ui.$VM_IP.nip.io
-  tls:
-  - secretName: k8s-ui-secret
-    hosts:
-      - k8s-ui.$VM_IP.nip.io
-service:
-  annotations:
-    projectcontour.io/upstream-protocol.tls: "443"
-EOF
-
-cat <<EOF | kubectl apply -f -
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: letsencrypt-staging
-  namespace: kubernetes-dashboard
-spec:
-  acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: cmoulliard@redhat.com
-    privateKeySecretRef:
-      name: letsencrypt-staging
-    solvers:
-      - http01:
-          ingress:
-            name: k8s-ui-kubernetes-dashboard
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: letsencrypt-staging
-  namespace: kubernetes-dashboard
-spec:
-  secretName: k8s-ui-secret
-  issuerRef:
-    name: letsencrypt-staging
-  dnsNames:
-  - k8s-ui.$VM_IP.nip.io
-EOF
-
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-helm install k8s-ui kubernetes-dashboard/kubernetes-dashboard -n kubernetes-dashboard -f $TCE_DIR/k8s-ui-values.yml
-
-kubectl create serviceaccount dashboard -n kubernetes-dashboard
-kubectl create clusterrolebinding dashboard-admin -n kubernetes-dashboard --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:dashboard
-
-K8s_TOKEN=$(kubectl get secret $(kubectl get serviceaccount dashboard -n kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" -n kubernetes-dashboard | base64 --decode)
-log_line "YELLOW" "Kubernetes dashboard URL: https://k8S-ui.$VM_IP.nip.io"
-log_line "YELLOW" "Kubernetes dashboard TOKEN: $K8s_TOKEN"
+log_line "YELLOW" "Additional stuff for Harbor"
+$TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
+head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
+kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
 
 HARBOR_PWD_STR=$(cat $TCE_DIR/values-harbor.yml | grep harborAdminPassword)
 IFS=': ' && read -a strarr <<< $HARBOR_PWD_STR
