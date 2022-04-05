@@ -57,4 +57,4 @@ log "YELLOW" "Uninstall the Tanzu CLI"
 
 log "YELLOW" "Remove downloaded files"
 rm -rf $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION/
-rm $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION.tar.gz
+rm $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION.tar.gz || true
