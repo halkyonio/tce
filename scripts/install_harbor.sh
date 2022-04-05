@@ -39,6 +39,53 @@ log() {
   echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
 }
 
+create_openssl_cfg() {
+CFG=$(cat <<EOF
+[req]
+distinguished_name = subject
+x509_extensions    = x509_ext
+prompt             = no
+[subject]
+C  = BE
+ST = Namur
+L  = Florennes
+O  = Red Hat
+OU = Snowdrop
+CN = $REG_SERVER
+[x509_ext]
+basicConstraints        = critical, CA:TRUE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always, issuer:always
+keyUsage                = critical, cRLSign, digitalSignature, keyCertSign
+nsComment               = "OpenSSL Generated Certificate"
+subjectAltName          = @alt_names
+[alt_names]
+DNS.1 = $REG_SERVER
+DNS.2 = notary.$REG_SERVER
+EOF
+)
+echo "$CFG"
+}
+
+log "CYAN" "Populate a self signed certificate ..."
+mkdir -p $TCE_DIR/certs/${REG_SERVER}
+sudo mkdir -p /etc/docker/certs.d/${REG_SERVER}
+
+log "CYAN" "Generate the openssl stuff"
+create_openssl_cfg > $TCE_DIR/certs/req.cnf
+
+log "CYAN" "Create the self signed certificate certificate and client key files"
+openssl req -x509 \
+  -nodes \
+  -days 365 \
+  -newkey rsa:4096 \
+  -keyout $TCE_DIR/certs/${REG_SERVER}/tls.key \
+  -out $TCE_DIR/certs/${REG_SERVER}/tls.crt \
+  -config $TCE_DIR/certs/req.cnf \
+  -sha256
+
+sudo cp $TCE_DIR/certs/${REG_SERVER}/tls.crt /etc/docker/certs.d/${REG_SERVER}/tls.crt
+
 cat <<EOF > $TCE_DIR/values-harbor.yml
 namespace: harbor
 hostname: harbor.$VM_IP.nip.io
