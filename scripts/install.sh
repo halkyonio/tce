@@ -176,9 +176,6 @@ tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 log "CYAN" "Install our demo repository containing the kubernetes dashboard package"
 tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
 
-log "CYAN" "Create the different needed namespaces: tce, harbor, kubernetes-dashboard"
-kubectl create ns harbor
-
 log "CYAN" "Got the latest version of the packages to be installed ..."
 declare -A packages
 packages[1,0]="cert-manager"
