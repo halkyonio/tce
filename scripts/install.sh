@@ -231,7 +231,7 @@ EOF
 packages[6,0]="k8s-ui"
 packages[6,1]="kubernetes-dashboard.halkyonio.io"
 packages[6,2]="YES"
-cat <<EOF > $TCE_DIR/k8s-ui-values.yml
+cat <<EOF > $TCE_DIR/values-k8s-ui.yml
 vm_ip: $VM_IP
 EOF
 
