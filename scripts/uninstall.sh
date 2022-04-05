@@ -3,6 +3,15 @@
 # Execute this command locally
 #
 # ./uninstall.sh
+#
+# Example:
+# VM_IP=65.108.148.216 REMOTE_HOME_DIR=$HOME CLUSTER_NAME=toto TCE_VERSION=v0.11.0 ./scripts/uninstall.sh
+#
+# Define the following env vars:
+# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
+# - CLUSTER_NAME: TCE Kind cluster name
+# - VM_IP: IP address of the VM where the cluster is running
+# - TCE_VERSION: Version of the Tanzu client (e.g. v0.11.0)
 
 set -e
 
@@ -45,3 +54,7 @@ tanzu uc delete $CLUSTER_NAME
 
 log "YELLOW" "Uninstall the Tanzu CLI"
 ~/.local/share/tce/uninstall.sh
+
+log "YELLOW" "Remove downloaded files"
+rm -rf $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION/
+rm $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION.tar.gz
