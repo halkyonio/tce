@@ -299,7 +299,7 @@ for ((i=1;i<=${#packages[@]};i++)) do
         fi
 done
 
-log_line "YELLOW" "Additional stuff for Harbor"
+log_line "YELLOW" "Execute some additional stuffs for Harbor"
 $TCE_DIR/harbor/config/scripts/generate-passwords.sh >> $TCE_DIR/values-harbor.yml
 head -n -1 $TCE_DIR/values-harbor.yml> $TCE_DIR/new-values-harbor.yml; mv $TCE_DIR/new-values-harbor.yml $TCE_DIR/values-harbor.yml
 kubectl create -n harbor secret generic harbor-tls --type=kubernetes.io/tls --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.crt --from-file=$TCE_DIR/certs/harbor.$VM_IP.nip.io/tls.key
@@ -317,6 +317,8 @@ log_line "YELLOW" "    --docker-password=<HARBOR_PWD>"
 log_line "YELLOW" "kubectl patch serviceaccount default -n <NAMESPACE> -p '{"imagePullSecrets": [{"name": "regcred"}]}'"
 
 log "YELLOW" "Kubernetes URL: https://k8s-ui.$VM_IP.nip.io"
+K8S_UI_TOKEN=$(kubectl get secret $(kubectl get serviceaccount dashboard -n kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" -n kubernetes-dashboard | base64 --decode)
+log_line "YELLOW" "Kubernetes dashboard TOKEN: $K8S_UI_TOKEN"
 
 ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec" && echo $ELAPSED
 log "YELLOW" "Elapsed time to create TCE and install the packages: $ELAPSED"
