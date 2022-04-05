@@ -236,6 +236,7 @@ for ((i=1;i<=7;i++)) do
 done
 
 log "YELLOW" "Kubernetes URL: https://k8s-ui.$VM_IP.nip.io"
+kubectl rollout status deployment/kubernetes-dashboard -n kubernetes-dashboard --timeout=240s
 K8S_UI_TOKEN=$(kubectl get secret $(kubectl get serviceaccount kubernetes-dashboard -n kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" -n kubernetes-dashboard | base64 --decode)
 log_line "YELLOW" "Kubernetes dashboard TOKEN: $K8S_UI_TOKEN"
 
