@@ -224,7 +224,7 @@ cat <<EOF > $TCE_DIR/values-k8s-ui.yml
 vm_ip: $VM_IP
 EOF
 
-for ((i=1;i<=8;i++)) do
+for ((i=1;i<=7;i++)) do
         PKG_NAME=${packages[$i,1]}
         jsonBody=`tanzu package available list -o json`
         PKG_VERSION=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."latest-version"'`
