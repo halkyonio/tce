@@ -219,6 +219,8 @@ tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 #log "CYAN" "Update the repository to get the latest packages"
 #tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:$REPO_VERSION -n $TCE_PACKAGES_NAMESPACE
 
+log "CYAN" "Install our demo repository containing the kubernetes dashboard package"
+tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
 
 log "CYAN" "Create the different needed namespaces: tce, harbor, kubernetes-dashboard"
 kubectl create ns harbor
@@ -276,6 +278,13 @@ enableContourHttpProxy: true
 tlsCertificateSecretName: harbor-tls
 EOF
 
+packages[6,0]="my-dashboard"
+packages[6,1]="kubernetes-dashboard.halkyonio.io"
+packages[6,2]="YES"
+cat <<EOF > $TCE_DIR/k8s-ui-values.yml
+vm_ip: $VM_IP
+EOF
+
 for ((i=0;i<=4;i++)) do
         PKG_NAME=${packages[$i,1]}
         jsonBody=`tanzu package available list -o json`
@@ -283,7 +292,7 @@ for ((i=0;i<=4;i++)) do
         PKG_SHORT_NAME=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."display-name"'`
         packages[$i,2]=$PKG_VERSION
         echo "Installing ${packages[$i,0]} - ${packages[$i,1]} - ${packages[$i,2]}"
-        if [ ${packages[$i,3]} = "" ]; then
+        if [ "${packages[$i,3]}" = "" ]; then
           echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE --wait=false"
         else
           echo "tanzu package install contour --package-name ${packages[$i,1]} --version ${packages[$i,2]} -n $TCE_PACKAGES_NAMESPACE -f $TCE_DIR/values-${packages[$i,0]}.yaml"
@@ -306,6 +315,8 @@ log_line "YELLOW" "    --docker-server=harbor.<IP>.nip.io \""
 log_line "YELLOW" "    --docker-username=admin \""
 log_line "YELLOW" "    --docker-password=<HARBOR_PWD>"
 log_line "YELLOW" "kubectl patch serviceaccount default -n <NAMESPACE> -p '{"imagePullSecrets": [{"name": "regcred"}]}'"
+
+log "YELLOW" "Kubernetes URL: https://k8s-ui.$VM_IP.nip.io"
 
 ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec" && echo $ELAPSED
 log "YELLOW" "Elapsed time to create TCE and install the packages: $ELAPSED"
