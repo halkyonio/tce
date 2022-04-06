@@ -1,0 +1,3 @@
+#@ load("/values.star", "values")
+
+#@ dummy_namespace = values.namespace
