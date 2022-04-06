@@ -1,5 +1,5 @@
-#@ load("@ytt:overlay", "overlay")
-#@ load("/values.star", "values")
 #@ load("@ytt:data", "data")
+#@ load("/_values.star", "values")
+---
 
-#@ dummy_namespace = values.namespace
+
