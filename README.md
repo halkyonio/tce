@@ -70,6 +70,13 @@ ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
 
 **REMARK**: To uninstall it, use the command `./scripts/uninstall.sh`
 
+If you need to use a private image registry (= harbor), then execute the following bash command top of a running TCE.
+It will install the harbor package, will populate a selfsigned CA certificate/key and update the containerd running within the control-plane.
+Follow the instructions within the terminal to figure out how to update the docker certificate folder, to log on and push images to the private registry:
+```bash
+REMOTE_HOME_DIR=<LOCAL_OR_REMOTE_HOME_DIR> VM_IP=<VM_IP> CLUSTER_NAME="toto" ./scripts/install_harbor.sh
+```
+
 ### Manual steps
 
 Install TCE and download a version `>= 0.11` or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build) as it supports to install now: cartographer, kpack
