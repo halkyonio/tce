@@ -41,7 +41,7 @@ do
 
   echo "Updating CA certificates in ${container}..."
   docker exec "$container" update-ca-certificates
-done <<< "$containers"
 
-echo "Restarting containerd"
-docker exec "$container" systemctl restart containerd
+  echo "Restarting containerd"
+  docker exec "$container" systemctl restart containerd
+done <<< "$containers"
