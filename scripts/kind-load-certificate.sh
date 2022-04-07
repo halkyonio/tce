@@ -5,7 +5,7 @@ set -e -o pipefail; [[ -n "$DEBUG" ]] && set -x
 CERT_DIR="${CERT_DIR:-"/usr/local/share/ca-certificates"}"
 
 function usage() {
-  echo "Usage: $(basename "$0") [-n kind-control-plane-name] certfile ..." >&2
+  echo "Usage: $(basename "$0") [-n kind-control-plane-name] cert-path ..." >&2
 }
 
 while getopts n: OPT; do
