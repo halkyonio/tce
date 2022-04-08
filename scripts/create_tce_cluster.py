@@ -64,18 +64,21 @@ def main(argv):
 
     print(f'{YELLOW} Install the tanzu client version: {tceVersion}')
     curlTceClientCommand = 'curl -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s ' + tceVersion + ' linux'
-    subprocess.run(curlTceClientCommand, shell=True)
+    p = subprocess.Popen(curlTceClientCommand, shell=True, stdout=subprocess.PIPE,)
+    while p.poll() is None:
+        output = p.stdout.readline()
+    print(output)
 
-    print(f'{YELLOW} Moving the tar.gz to the tce directory')
-    tarFileName = "tce-linux-amd64-%s.tar.gz" % tceVersion
-    subprocess.run('cp ' + tarFileName + ' ' + tceDir, shell=True)
+    #print(f'{YELLOW} Moving the tar.gz to the tce directory')
+    #tarFileName = "tce-linux-amd64-%s.tar.gz" % tceVersion
+    #subprocess.run('cp ' + tarFileName + ' ' + tceDir, shell=True)
 
-    print(f'{YELLOW} Extracting the TCE Client tar.gz file')
-    subprocess.run(f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/', shell=True)
-    subprocess.run(["ls", "-l", tceDir])
+    #print(f'{YELLOW} Extracting the TCE Client tar.gz file')
+    #subprocess.run(f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/', shell=True)
+    # subprocess.run(["ls", "-l", tceDir])
 
-    subprocess.run(f'{remoteHomeDir}/.tanzu', shell=True)
-    subprocess.run(f'tanzu completion bash > {remoteHomeDir}/.tanzu/completion.bash.inc', shell=True)
+    #subprocess.run(f'{remoteHomeDir}/.tanzu', shell=True)
+    #subprocess.run(f'tanzu completion bash > {remoteHomeDir}/.tanzu/completion.bash.inc', shell=True)
 
     end = time.time()
     elapsed = end - start
