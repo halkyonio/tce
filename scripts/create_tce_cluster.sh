@@ -30,6 +30,19 @@ TKR_VERSION=${TKR_VERSION:-v1.22.5}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
 
+while getopts 'h' OPTION; do
+  case "$OPTION" in
+    h)
+      echo "script usage: $(basename \$0) [-h]" >&2
+	    exit 0
+      ;;
+    ?)
+      echo "script usage: $(basename \$0) [-h]" >&2
+      exit 1
+      ;;
+  esac
+done
+
 # Defining some colors for output
 RED='\033[0;31m'
 NC='\033[0m' # No Color
