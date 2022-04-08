@@ -62,12 +62,11 @@ def main(argv):
     print(f'{GREEN} Kubernetes API port : {remoteK8sPort}')
     print(f'{GREEN} Temp TCE dir        : {tceDir}')
 
-    print(f'{YELLOW} Install the tanzu client version: {tceVersion}')
+    print(f'{GREEN} Install the tanzu client version: {tceVersion}')
     curlTceClientCommand = 'curl -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s ' + tceVersion + ' linux'
     p = subprocess.Popen(curlTceClientCommand, shell=True, stdout=subprocess.PIPE,)
     while p.poll() is None:
-        output = p.stdout.readline()
-    print(output)
+        print(f'{GREEN} {p.stdout.readline()}')
 
     #print(f'{YELLOW} Moving the tar.gz to the tce directory')
     #tarFileName = "tce-linux-amd64-%s.tar.gz" % tceVersion
