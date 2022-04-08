@@ -23,13 +23,12 @@ KUBE_CFG=${KUBE_CFG:=config}
 VM_IP=${VM_IP:=127.0.0.1}
 CLUSTER_NAME=${CLUSTER_NAME:=toto}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
+REMOTE_K8S_PORT=${REMOTE_K8S_PORT:-31452}
 
 TCE_VERSION=${TCE_VERSION:-v0.11.0}
 TKR_VERSION=${TKR_VERSION:-v1.22.5}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
-
-REG_SERVER=harbor.$VM_IP.nip.io
 
 # Defining some colors for output
 RED='\033[0;31m'
@@ -46,21 +45,29 @@ repeat_char(){
 	for i in {1..50}; do echo -ne "${!COLOR}$2${NC}"; done
 }
 
-log_msg() {
-    COLOR=${1}
-    MSG="${@:2}"
-    echo -e "\n${!COLOR}## ${MSG}${NC}"
-}
-
 log_line() {
     COLOR=${1}
     MSG="${@:2}"
     echo -e "${!COLOR}## ${MSG}${NC}"
 }
 
+log_msg() {
+    COLOR=${1}
+    MSG="${@:2}"
+    echo -e "\n${!COLOR}## ${MSG}${NC}"
+}
+
 log() {
   MSG="${@:2}"
   echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
+}
+
+repeat(){
+	local start=1
+	local end=${1:-80}
+	local str="${2:-=}"
+	local range=$(seq $start $end)
+	for i in $range ; do echo -n "${str}"; done
 }
 
 log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
@@ -92,7 +99,7 @@ ProviderConfiguration:
     apiVersion: kind.x-k8s.io/v1alpha4
     networking:
       apiServerAddress: $VM_IP
-      apiServerPort: 31452
+      apiServerPort: $REMOTE_K8S_PORT
     nodes:
     - role: control-plane
       extraPortMappings:
@@ -118,3 +125,30 @@ tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
 
 log "CYAN" "Install our demo repository containing the kubernetes dashboard package"
 tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
+
+sleep 10s
+
+log_line "GREEN" ""
+log_line "GREEN" "The TCE kind cluster '$CLUSTER_NAME' has been created on a K8s cluster: $TKR_VERSION !"
+log_line "GREEN" "The following packages are available: "
+
+# Print a table containing the packages
+header="\033[0;32m %-30s | %-55s | %10s\n"
+format="\033[0;32m %-30s | %-55s | %10s\n"
+
+printf "$header" "Name" "Package Name" "Version"
+repeat 101 '-'; echo
+
+while read -r package; do
+  name=$(echo $package | jq -r '."display-name"')
+  package_name=$(echo $package | jq -r '."name"')
+  package_version=$(echo $package | jq -r '."latest-version"')
+  printf "$format" "$name" "$package_name" "$package_version"
+done <<< "$(tanzu package available list -o json | jq -c '.[]')"
+
+log_line "GREEN" ""
+log_line "GREEN" "You can access it remotely using the url: https://$VM_IP:$REMOTE_K8S_PORT"
+log_line "GREEN" "Update then your .kube/conf file with this cfg: $REMOTE_HOME_DIR/.config/tanzu/tkg/unmanaged/$CLUSTER_NAME/kube.conf"
+log_line "GREEN" ""
+cat $REMOTE_HOME_DIR/.config/tanzu/tkg/unmanaged/$CLUSTER_NAME/kube.conf
+log_line "GREEN" ""
