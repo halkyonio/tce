@@ -13,7 +13,6 @@
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
 # - CLUSTER_NAME: TCE Kind cluster name
-# - REMOTE_HOME_DIR: Remote home dir where the script is executed
 # - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.11.0
 # - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
 #
