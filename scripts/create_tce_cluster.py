@@ -1,3 +1,4 @@
+import os
 import sys, getopt, time, subprocess
 
 # Defining some colors
@@ -62,22 +63,31 @@ def main(argv):
     print(f'{GREEN} Kubernetes API port : {remoteK8sPort}')
     print(f'{GREEN} Temp TCE dir        : {tceDir}')
 
-    print(f'{GREEN} Install the tanzu client version: {tceVersion}')
-    curlTceClientCommand = 'curl -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s ' + tceVersion + ' linux'
-    p = subprocess.Popen(curlTceClientCommand, shell=True, stdout=subprocess.PIPE,)
-    while p.poll() is None:
-        print(f'{GREEN} {p.stdout.readline()}')
+    print(f'{GREEN} ##################################################')
+    print(f'{GREEN} ## Install the tanzu client version: {tceVersion}')
+    print(f'{GREEN} ##################################################')
+    curlTceClientCommand = f'curl -s -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s {tceVersion} linux'
+    output = os.popen(curlTceClientCommand)
+    print(f'{GREEN} ## Result: {output.read()}')
 
-    #print(f'{YELLOW} Moving the tar.gz to the tce directory')
-    #tarFileName = "tce-linux-amd64-%s.tar.gz" % tceVersion
-    #subprocess.run('cp ' + tarFileName + ' ' + tceDir, shell=True)
+    print(f'{GREEN} ##################################################')
+    print(f'{GREEN} Moving the tar.gz to the tce directory')
+    tarFileName = f'tce-linux-amd64-{tceVersion}.tar.gz'
+    output = os.popen(f'cp {tarFileName} {tceDir}')
+    print(f'{GREEN} ## Result: {output.read()}')
 
-    #print(f'{YELLOW} Extracting the TCE Client tar.gz file')
-    #subprocess.run(f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/', shell=True)
-    # subprocess.run(["ls", "-l", tceDir])
+    print(f'{GREEN} ##################################################')
+    print(f'{YELLOW} Extracting the TCE Client tar.gz file')
+    cmd = f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/'
+    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
 
-    #subprocess.run(f'{remoteHomeDir}/.tanzu', shell=True)
-    #subprocess.run(f'tanzu completion bash > {remoteHomeDir}/.tanzu/completion.bash.inc', shell=True)
+    print(f'{GREEN} ##################################################')
+    cmd = f'{remoteHomeDir}/.tanzu'
+    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
+
+    print(f'{GREEN} ##################################################')
+    cmd = f'tanzu completion bash > {remoteHomeDir}/.tanzu/completion.bash.inc'
+    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
 
     end = time.time()
     elapsed = end - start
