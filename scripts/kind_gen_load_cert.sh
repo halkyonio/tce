@@ -6,7 +6,7 @@
 #
 # Execute this command locally
 #
-# ./inkind_gen_load_cert.sh
+# ./kind_gen_load_cert.sh
 #
 # Example:
 # VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/install.sh
