@@ -13,7 +13,6 @@
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
 # - CLUSTER_NAME: TCE Kind cluster name
-# - REMOTE_HOME_DIR: Remote home dir where the script is executed
 # - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.11.0
 # - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
 #
@@ -30,18 +29,17 @@ TKR_VERSION=${TKR_VERSION:-v1.22.5}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
 
-while getopts 'h' OPTION; do
-  case "$OPTION" in
-    h)
-      echo "script usage: $(basename \$0) [-h]" >&2
-	    exit 0
-      ;;
-    ?)
-      echo "script usage: $(basename \$0) [-h]" >&2
-      exit 1
-      ;;
-  esac
-done
+#display_usage() {
+#	echo "Execute this script ./create_tce_cluster.sh"
+#	echo -e "\nUsage: $0 [arguments] \n"
+#}
+
+## if less than two arguments supplied, display usage
+#if [  $# -le 1 ]
+#then
+#	display_usage
+#	exit 1
+#fi
 
 # Defining some colors for output
 RED='\033[0;31m'
