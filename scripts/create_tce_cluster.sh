@@ -10,11 +10,12 @@
 # VM_IP=65.108.148.216 CLUSTER_NAME=toto ./scripts/install.sh
 #
 # Define the following env vars:
-# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
-# - VM_IP: IP address of the VM where the cluster is running
-# - CLUSTER_NAME: TCE Kind cluster name
-# - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.11.0
-# - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
+# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM (e.g /home/snowdrop)
+# - VM_IP: IP address of the VM where the cluster is running (e.g 10.1.1.2)
+# - CLUSTER_NAME: TCE Kind cluster name (e.g toto)
+# - TCE_VERSION: Version of the Tanzu client to be installed. (e.g. v0.11.0)
+# - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. (e.g v1.22.5)
+# - REMOTE_K8S_PORT: Remote port to access the Kubernetes API Server (e.g. 31452)
 #
 set -e
 
@@ -83,8 +84,6 @@ repeat(){
 
 log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
-
-SECONDS=0
 
 log "CYAN" "Install the tanzu client version: $TCE_VERSION"
 curl -H "Accept: application/vnd.github.v3.raw" \
