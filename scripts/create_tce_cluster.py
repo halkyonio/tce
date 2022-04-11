@@ -11,6 +11,16 @@ MAGENTA = '\033[0;35m'
 CYAN    = '\033[0;36m'
 WHITE   = '\033[0;37m'
 
+def log_msg(color, msg):
+    msgLength = len(msg) + 6
+    header = "#" * msgLength
+    print(f'{color} {header}')
+    print(f'{color} ## {msg} ##')
+    print(f'{color} {header}')
+
+def log_result(color, result):
+    print(f'{color} ## {result}')
+
 def usage():
     print("Usage: "+sys.argv[0]+" [-h] -p <REMOTE_HOME_DIR> -i <VM_IP> -n <CLUSTER_NAME> -t <TCE_VERSION> -r <TKR_VERSION> -k <K8S_PORT>")
     print(''' 
@@ -63,31 +73,17 @@ def main(argv):
     print(f'{GREEN} Kubernetes API port : {remoteK8sPort}')
     print(f'{GREEN} Temp TCE dir        : {tceDir}')
 
-    print(f'{GREEN} ##################################################')
-    print(f'{GREEN} ## Install the tanzu client version: {tceVersion}')
-    print(f'{GREEN} ##################################################')
-    curlTceClientCommand = f'curl -s -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s {tceVersion} linux'
-    output = os.popen(curlTceClientCommand)
-    print(f'{GREEN} ## Result: {output.read()}')
+    log_msg(GREEN,f'Install the tanzu client version: {tceVersion}')
+    cmd = f'curl -s -H "Accept: application/vnd.github.v3.raw" -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | bash -s {tceVersion} linux'
+    log_result(GREEN,f'{ os.popen(cmd).read() }')
 
-    print(f'{GREEN} ##################################################')
-    print(f'{GREEN} Moving the tar.gz to the tce directory')
-    tarFileName = f'tce-linux-amd64-{tceVersion}.tar.gz'
-    output = os.popen(f'cp {tarFileName} {tceDir}')
-    print(f'{GREEN} ## Result: {output.read()}')
+    #log_msg(GREEN,'Moving the tar.gz to the tce directory')
+    #cmd = f'tce-linux-amd64-{tceVersion}.tar.gz'
+    #log_result(GREEN,f'{ os.popen(cmd).read() }')
 
-    print(f'{GREEN} ##################################################')
-    print(f'{YELLOW} Extracting the TCE Client tar.gz file')
-    cmd = f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/'
-    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
-
-    print(f'{GREEN} ##################################################')
-    cmd = f'{remoteHomeDir}/.tanzu'
-    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
-
-    print(f'{GREEN} ##################################################')
-    cmd = f'tanzu completion bash > {remoteHomeDir}/.tanzu/completion.bash.inc'
-    print(f'{GREEN} ## Result: {os.popen(cmd).read()}')
+    #log_msg(GREEN,'Extracting the TCE Client tar.gz file')
+    #cmd = f'tar xzvf {tceDir}/tce-linux-amd64-{tceVersion}.tar.gz -C {tceDir}/'
+    #log_result(GREEN,f'{ os.popen(cmd).read() }')
 
     end = time.time()
     elapsed = end - start
