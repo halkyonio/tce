@@ -39,9 +39,10 @@ log() {
   echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
 }
 
-log "YELLOW" "Uninstall the Tanzu CLI"
+log "YELLOW" "Uninstalling the Tanzu CLI"
 $REMOTE_HOME_DIR/.local/share/tce/uninstall.sh
 
-log "YELLOW" "Remove downloaded files"
+log "YELLOW" "Remove downloaded file"
 rm -rf $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION.tar.gz
+log "YELLOW" "Remove local project created"
 rm -rf $REMOTE_HOME_DIR/tce/tce-linux-amd64-$TCE_VERSION/
