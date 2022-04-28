@@ -60,7 +60,7 @@ DEST_DIR="/usr/local/bin"
 VM_IP=${VM_IP:-127.0.0.1}
 
 log "CYAN" "Install useful tools: k9s, unzip, wget, jq,..."
-sudo yum install git wget openssl unzip bash-completion -y
+sudo yum install git wget openssl tar unzip bash-completion -y
 sudo yum install jq -y
 
 log "CYAN" "Install kubectl - version: $KUBE_VERSION"
