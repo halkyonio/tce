@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 #
-# Execute this command locally
+# Execute this command locally to install:
+# - kubectl
+# - k9s
+# - helm
+# - clusterctl
+# - kubectl krew konfig
+# - kubectl krew context
+# - kubectl krew ns
+# - kubectl krew tree
+# - alias for kc, konfig, kubectx, kubens, ktree ...
 #
 # ./install_k8s_tools.sh
 #
@@ -13,6 +22,7 @@
 # - KUBE_VERSION: Kubectl version to be installed (E.g. v1.21.0)
 # - KIND_VERSION: Version of Kubernetes Kind tool
 # - CAPI_VERSION: Kubernetes Cluster API client version
+# - HELM_VERSION: Helm version
 #
 
 set -e
@@ -59,6 +69,7 @@ REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 KUBE_VERSION=${KUBE_VERSION:-v1.21.11}
 KIND_VERSION=${KIND_VERSION:-v0.12.0}
 CAPI_VERSION=${CAPI_VERSION:-v1.1.3}
+HELM_VERSION=${HELM_VERSION:-v3.2.8}
 
 DEST_DIR="/usr/local/bin"
 
@@ -105,17 +116,17 @@ ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install ctx
 ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install ns
 ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install konfig
 
-printf "\n### kubectl tree\nalias kc='kubectl'\n" >> $HOME/.bashrc
-printf "\n### kubectl tree\nalias ktree='kubectl tree'\n" >> $HOME/.bashrc
-printf "\n### kubectl ns\nalias kubens='kubectl ns'\n" >> $HOME/.bashrc
-printf "\n### kubectl ctx\nalias kubectx='kubectl ctx'\n" >> $HOME/.bashrc
-printf "\n### kubectl konfig\nalias konfig='kubectl konfig'\n" >> $HOME/.bashrc
+printf "\n### kubectl - kc\nalias kc='kubectl'\n" >> $HOME/.bashrc
+printf "\n### kubectl tree - ktree\nalias ktree='kubectl tree'\n" >> $HOME/.bashrc
+printf "\n### kubectl ns - kubens\nalias kubens='kubectl ns'\n" >> $HOME/.bashrc
+printf "\n### kubectl ctx - kubectx\nalias kubectx='kubectl ctx'\n" >> $HOME/.bashrc
+printf "\n### kubectl konfig - konfig\nalias konfig='kubectl konfig'\n" >> $HOME/.bashrc
 source $HOME/.bashrc
 
-log "CYAN" "Installing Helm"
+log "CYAN" "Installing Helm : $HELM_VERSION"
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
-./get_helm.sh
+./get_helm.sh --version $HELM_VERSION
 
 log "CYAN" "Installing Kubernetes Cluster API : $CAPI_VERSION"
 curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/$CAPI_VERSION/clusterctl-linux-amd64 -o clusterctl
