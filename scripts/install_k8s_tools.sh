@@ -70,7 +70,7 @@ REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 KUBE_VERSION=${KUBE_VERSION:-v1.21.11}
 KIND_VERSION=${KIND_VERSION:-v0.12.0}
 CAPI_VERSION=${CAPI_VERSION:-v1.1.3}
-HELM_VERSION=${HELM_VERSION:-v3.2.8}
+HELM_VERSION=${HELM_VERSION:-v3.8.2}
 
 DEST_DIR="/usr/local/bin"
 
@@ -127,7 +127,7 @@ source $HOME/.bashrc
 log "CYAN" "Installing Helm : $HELM_VERSION"
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
-./get_helm.sh --version $HELM_VERSION
+./get_helm.sh -v $HELM_VERSION
 
 log "CYAN" "Installing Kubernetes Cluster API : $CAPI_VERSION"
 curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/$CAPI_VERSION/clusterctl-linux-amd64 -o clusterctl
