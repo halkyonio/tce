@@ -11,6 +11,8 @@
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
 # - KUBE_VERSION: Kubectl version to be installed (E.g. v1.21.0)
+# - KIND_VERSION: Version of Kubernetes Kind tool
+# - CAPI_VERSION: Kubernetes Cluster API client version
 #
 
 set -e
@@ -55,6 +57,9 @@ K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/
 
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 KUBE_VERSION=${KUBE_VERSION:-v1.21.11}
+KIND_VERSION=${KIND_VERSION:-v0.12.0}
+CAPI_VERSION=${CAPI_VERSION:-v1.1.3}
+
 DEST_DIR="/usr/local/bin"
 
 VM_IP=${VM_IP:-127.0.0.1}
@@ -111,3 +116,11 @@ log "CYAN" "Installing Helm"
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
+
+log "CYAN" "Installing Kubernetes Cluster API : $CAPI_VERSION"
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/$CAPI_VERSION/clusterctl-linux-amd64 -o clusterctl
+chmod +x ./clusterctl && sudo mv ./clusterctl /usr/local/bin/clusterctl
+
+log "CYAN" "Installing Kubernetes kind : $KIND_VERSION"
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64
+chmod +x ./kind && sudo mv ./kind /usr/local/bin/kind
