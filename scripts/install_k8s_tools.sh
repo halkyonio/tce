@@ -59,6 +59,13 @@ DEST_DIR="/usr/local/bin"
 
 VM_IP=${VM_IP:-127.0.0.1}
 
+log "CYAN" "Check the linux distro to install or not the epel repo"
+LINUX_DISTRO_NAME=$(awk -F= '$1=="NAME" { print $2 ;}' /etc/os-release)
+echo $LINUX_DISTRO_NAME
+if [ "$LINUX_DISTRO_NAME" = "CentOS Linux" ]; then
+    sudo yum install epel-release -y
+fi
+
 log "CYAN" "Install useful tools: k9s, unzip, wget, jq,..."
 sudo yum install git wget openssl tar unzip bash-completion -y
 sudo yum install jq -y
