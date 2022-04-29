@@ -61,8 +61,9 @@ VM_IP=${VM_IP:-127.0.0.1}
 
 log "CYAN" "Check the linux distro to install or not the epel repo"
 LINUX_DISTRO_NAME=$(awk -F= '$1=="NAME" { print $2 ;}' /etc/os-release)
-echo $LINUX_DISTRO_NAME
-if [ "$LINUX_DISTRO_NAME" = "CentOS Linux" ]; then
+
+if [ "${LINUX_DISTRO_NAME}" = "\"CentOS Linux\"" ]; then
+    log "CYAN" "Install epel-release"
     sudo yum install epel-release -y
 fi
 
