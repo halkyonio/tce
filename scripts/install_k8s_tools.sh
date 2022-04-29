@@ -4,6 +4,7 @@
 # - kubectl
 # - k9s
 # - helm
+# - kind
 # - clusterctl
 # - kubectl krew konfig
 # - kubectl krew context
