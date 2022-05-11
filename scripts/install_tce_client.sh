@@ -16,7 +16,7 @@ set -e
 KUBE_CFG=${KUBE_CFG:=config}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 
-TCE_VERSION=${TCE_VERSION:-v0.11.0}
+TCE_VERSION=${TCE_VERSION:-v0.12.0}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 
 # Defining some colors for output
