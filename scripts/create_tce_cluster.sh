@@ -59,7 +59,6 @@ Cni: calico
 CniConfiguration: {}
 PodCidr: 10.244.0.0/16
 ServiceCidr: 10.96.0.0/16
-TkrLocation: projects.registry.vmware.com/tce/tkr:$TKR_VERSION
 PortsToForward: []
 SkipPreflight: false
 ControlPlaneNodeCount: "1"
