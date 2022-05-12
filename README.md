@@ -4,11 +4,13 @@
 * [TCE installation](#tce-installation)
   * [All in one](#all-in-one)
   * [Manual steps](#manual-steps)
-  * [Create a K8s cluster](#create-a-k8s-cluster)
-  * [Configure/install the needed packages](#configureinstall-the-needed-packages)
+    * [Install TCE](#install-tce)
+    * [Create a K8s cluster](#create-a-k8s-cluster)
+    * [Configure/install the needed packages](#configureinstall-the-needed-packages)
 * [Demo](#demo)
-* [Install, upgrade needed tools (optional)](#install-upgrade-needed-tools-optional)
-* [Install the K8s dashboard (optional)](#install-the-k8s-dashboard-optional)
+* [Optional](#optional)
+  * [Install, upgrade needed tools](#install-upgrade-needed-tools)
+  * [Install the K8s dashboard (optional)](#install-the-k8s-dashboard-optional)
 
 ## Introduction
 
@@ -100,7 +102,10 @@ REMOTE_HOME_DIR=<LOCAL_OR_REMOTE_HOME_DIR> VM_IP=<VM_IP> CLUSTER_NAME="toto" ./s
 
 ### Manual steps
 
-Install TCE using a [released version](https://tanzucommunityedition.io/docs/v0.12/cli-installation/) or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build)
+#### Install TCE
+
+Install the Tanzu client using either [released version](https://tanzucommunityedition.io/docs/v0.12/cli-installation/) or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build)
+as described hereafter
 
 ```bash
 mkdir tce && cd tce/
@@ -114,7 +119,7 @@ tanzu completion bash >  $HOME/.tanzu/completion.bash.inc
 printf "\n# Tanzu shell completion\nsource '$HOME/.tanzu/completion.bash.inc'\n" >> $HOME/.bash_profile
 ```
 
-### Create a K8s cluster
+#### Create a K8s cluster
 
 Create the TCE unmanaged cluster (= Kind cluster)
 ```bash
@@ -122,7 +127,7 @@ tanzu uc delete toto
 tanzu uc create toto -p 80:80 -p 443:443
 ```
 
-### Configure/install the needed packages
+#### Configure/install the needed packages
 
 Install the needed packages
 ```bash
@@ -162,51 +167,56 @@ tanzu package install app-toolkit --package-name app-toolkit.community.tanzu.vmw
 
 ## Demo
 
-We will now use to build an image from the source and next deploy a knative service
+We will now install a Spring Petclinic demo and check if the application os build/deployed and service exposed
 ```bash
-git clone https://github.com/vmware-tanzu/cartographer.git
-pushd $HOME/tce/cartographer/examples/basic-sc/
-cat <<EOF > new-values.yaml
-#@data/values
+APP=spring-tap-petclinic \
+tanzu apps workload create $APP \
+  --git-repo https://github.com/halkyonio/$APP.git#
+  --git-branch main \
+  --type web \
+  --label app.kubernetes.io/part-of=$APP \
+  -n demo
+```
+Tail the log of the workload to follow the status about the build, ...
+```bash
+tanzu apps workload -n demo tail spring-tap-petclinic
++ spring-tap-petclinic-build-1-build-pod › prepare
+- spring-tap-petclinic-build-1-build-pod › prepare
++ spring-tap-petclinic-build-1-build-pod › prepare
++ spring-tap-petclinic-build-1-build-pod › analyze
+- spring-tap-petclinic-build-1-build-pod › prepare
++ spring-tap-petclinic-build-1-build-pod › prepare
+...
+spring-tap-petclinic-build-1-build-pod[build] Paketo BellSoft Liberica Buildpack 9.3.1
+spring-tap-petclinic-build-1-build-pod[build]   https://github.com/paketo-buildpacks/bellsoft-liberica
+spring-tap-petclinic-build-1-build-pod[build]   Build Configuration:
+spring-tap-petclinic-build-1-build-pod[build]     $BP_JVM_TYPE                 JRE             the JVM type - JDK or JRE
+spring-tap-petclinic-build-1-build-pod[build]     $BP_JVM_VERSION              11              the Java version
+...
+```
+Finally, get the URL of the service to access it using this command and open the address
+within your favorite browser
+```bash
+# spring-tap-petclinic: Ready
 ---
-service_account_name: cartographer-example-basic-sc-sa
-image_prefix: ghcr.io/halkyonio/demo-
-workload_name: dev
-registry:
-  server: ghcr.io
-  username: xxxxxxxx
-  password: yyyyyyyyy
-EOF
-kapp deploy --yes -a supplychain -f <(ytt --ignore-unknown-comments -f ../shared/ -f ./app-operator/ -f ./new-values.yaml)
-kapp deploy --yes -a example -f <(ytt --ignore-unknown-comments -f ./developer/ -f ./new-values.yaml)
-popd
-```
-Wait till the build pod is created within the default namespace and check the status ...
-```bash
-kubectl -n default get workload/dev
-kubectl get pods -n default
+lastTransitionTime: "2022-05-12T10:09:29Z"
+message: ""
+reason: Ready
+status: "True"
+type: Ready
 
-ktree workload dev
-NAMESPACE  NAME                                 READY  REASON               AGE
-default    Workload/dev                         True   Ready                89s
-default    ├─App/dev                            -                           25s
-default    ├─GitRepository/dev                  True   GitOperationSucceed  87s
-default    └─Image/dev                          True                        85s
-default      ├─Build/dev-build-1                -                           85s
-default      │ └─Pod/dev-build-1-build-pod      False  PodCompleted         84s
-default      ├─PersistentVolumeClaim/dev-cache  -                           85s
-default      └─SourceResolver/dev-source        True                        85s
-```
-When the deployment has been created, get the URL and PORT to curl it
-```bash
-URL=$(kubectl -n default get ksvc/dev -o jsonpath='{.status.url}')
-curl $URL
-hello world
-```
-To clean up the example, simply delete it
-```bash
-kapp delete -a example
-kapp delete -a supplychain
+Source
+type:     git
+url:      https://github.com/halkyonio/spring-tap-petclinic.git
+branch:   main
+
+Pods
+NAME                                     STATUS      RESTARTS   AGE
+spring-tap-petclinic-build-1-build-pod   Succeeded   0          10m
+
+Knative Services
+NAME                   READY   URL
+spring-tap-petclinic   Ready   http://spring-tap-petclinic.demo.65.108.212.158.nip.io
 ```
 
 ## Optional
@@ -278,6 +288,8 @@ brew install crane
 ```
 
 ### Install the K8s dashboard (optional)
+
+Deprecated: TheKubernetes dashboard is installed by default when we execute the [bash script](./scripts/install.sh)
 
 Setup the Issuer & Certificate resources used by the certificate Manager to generate a selfsigned certificate and dnsNames `k8s-ui.$IP.nip.io` using Letscencrypt.
 The secret name `k8s-ui-secret` referenced by the Certificate resource will be filled by the Certificate Manager and next used by the Ingress TLS endpoint
