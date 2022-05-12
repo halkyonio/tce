@@ -8,9 +8,6 @@
     * [Create a K8s cluster](#create-a-k8s-cluster)
     * [Configure/install the needed packages](#configureinstall-the-needed-packages)
 * [Demo](#demo)
-* [Optional](#optional)
-  * [Install, upgrade needed tools](#install-upgrade-needed-tools)
-  * [Install the K8s dashboard (optional)](#install-the-k8s-dashboard-optional)
 
 ## Introduction
 
