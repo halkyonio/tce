@@ -14,6 +14,7 @@
 This page describes how to install Tanzu community Edition (aka: TCE) and play a nice Spring Boot Petclinic demo. 
 
 **TL;DR**
+
 TCE is a standalone client designed around a pluggable architecture, able to create clusters (unmanaged - local or managed - AWS, Azure, vSphere)
 like the packages and/or repository about the components to be installed.
 
