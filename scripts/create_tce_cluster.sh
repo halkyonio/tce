@@ -28,57 +28,9 @@ TCE_VERSION=${TCE_VERSION:-v0.12.0}
 TKR_VERSION=${TKR_VERSION:-v1.22.7}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 
-#display_usage() {
-#	echo "Execute this script ./create_tce_cluster.sh"
-#	echo -e "\nUsage: $0 [arguments] \n"
-#}
+DIR=`dirname $0` # to get the location where the script is located
 
-## if less than two arguments supplied, display usage
-#if [  $# -le 1 ]
-#then
-#	display_usage
-#	exit 1
-#fi
-
-# Defining some colors for output
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-YELLOW='\033[0;33m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[0;37m'
-
-repeat_char(){
-  COLOR=${1}
-	for i in {1..50}; do echo -ne "${!COLOR}$2${NC}"; done
-}
-
-log_line() {
-    COLOR=${1}
-    MSG="${@:2}"
-    echo -e "${!COLOR}## ${MSG}${NC}"
-}
-
-log_msg() {
-    COLOR=${1}
-    MSG="${@:2}"
-    echo -e "\n${!COLOR}## ${MSG}${NC}"
-}
-
-log() {
-  MSG="${@:2}"
-  echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
-}
-
-repeat(){
-	local start=1
-	local end=${1:-80}
-	local str="${2:-=}"
-	local range=$(seq $start $end)
-	for i in $range ; do echo -n "${str}"; done
-}
+. $DIR/util.sh
 
 log "CYAN" "Configure the TCE cluster config file: $TCE_DIR/config.yml"
 cat <<EOF > $TCE_DIR/config.yml
@@ -135,7 +87,7 @@ while read -r package; do
   package_name=$(echo $package | jq -r '."name"')
   package_version=$(echo $package | jq -r '."latest-version"')
   printf "$format" "$name" "$package_name" "$package_version"
-done <<< "$(tanzu package available list -o json | jq -c '.[]')"
+done <<< "$(tanzu package available list -A -o json | jq -c '.[]')"
 
 log_line "GREEN" ""
 log_line "GREEN" "You can access it remotely using the url: https://$VM_IP:$REMOTE_K8S_PORT"
