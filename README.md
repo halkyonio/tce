@@ -49,29 +49,55 @@ Execute the `./scripts/install.sh` where you will set the following variables:
 - **REMOTE_HOME_DIR**: home directory where files will be installed locally or within the remote VM
 - **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
 - **CLUSTER_NAME**: TCE Kind cluster name
-- **TCE_VERSION**: Version of the Tanzu client to be installed. E.g. v0.12.0
-- **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
+- **TCE_VERSION**: Version of the Tanzu client to be installed. (e.g.: v0.12.0)
+- **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. (e.g.: v1.22.5)
+- **REGISTRY_SERVER**: Container image registry (e.g: docker.io, ghcr.io, ...)
+- **REGISTRY_OWNER**: Username of the account, github org used to access the Registry server
+- **REGISTRY_USERNAME**: Registry account username
+- **REGISTRY_PASSWORD**: Registry account password
 
 ```bash
 REMOTE_HOME_DIR="$HOME" \
 VM_IP="127.0.0.1" \
 CLUSTER_NAME="toto" \
 TCE_VERSION="v0.12.0" \
-TKR_VERSION="v0.21.2" \
+TKR_VERSION="v1.22.7-2" \
+REGISTRY_SERVER="ghcr.io" \
+REGISTRY_OWNER="<org>" \
+REGISTRY_USERNAME="<github_user>" \
+REGISTRY_PASSWORD="<github_token>" \
 ./scripts/install.sh
 
 or for remote deployment
 
+tar -czf - ./scripts/*.sh |  ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} "tar -xzf -"
 ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
     REMOTE_HOME_DIR="/home/centos" \
     VM_IP=${IP} \
     CLUSTER_NAME="toto" \
     TCE_VERSION="v0.12.0" \
-    TKR_VERSION="v0.21.2" \
-    "bash -s" -- < ./scripts/install.sh
+    TKR_VERSION="v1.22.7-2" \
+    REGISTRY_SERVER="ghcr.io" \
+    REGISTRY_OWNER="<org>" \
+    REGISTRY_USERNAME="<github_user>" \
+    REGISTRY_PASSWORD="<github_token>" \
+    "bash ./scripts/install.sh"
 ```
 
-**REMARK**: To uninstall it, use the command `./scripts/uninstall.sh`
+To uninstall it, use the command 
+
+```bash
+REMOTE_HOME_DIR="/home/snowdrop" \
+CLUSTER_NAME="toto" \
+./scripts/uninstall.sh
+
+or
+
+ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
+    REMOTE_HOME_DIR="/home/snowdrop" \
+    CLUSTER_NAME="toto" \
+    "bash ./scripts/uninstall.sh"
+````
 
 If you need to use a private image registry (= harbor), then execute the following bash command top of a running TCE.
 It will install the harbor package, will populate a selfsigned CA certificate/key and update the containerd running within the control-plane.
