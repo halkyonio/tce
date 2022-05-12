@@ -33,7 +33,7 @@ Use the following bash [script](scripts/install.sh) to perform the following ope
 
 - Install the tanzu client 
 - Create an [unmanaged](https://tanzucommunityedition.io/docs/v0.12/getting-started-unmanaged/#getting-started-with-unmanaged-clusters) kubernetes cluster 
-- Deploy some cool packages able to demo a GitOps scenario
+- Deploy some cool packages such as the [App-Toolkit package](https://tanzucommunityedition.io/docs/v0.12/package-readme-app-toolkit-0.2.0/) able to demo a GitOps scenario
 
 **NOTE**: Before to execute the installation, verify first if the Tanzu Kubernetes Release version (or TKR) is compatible with the TCE version using the [list_tkr_version.sh](./scripts/list_tkr_version.sh) script.
 Pass the TCE version as parameter `TCE_VERSION=dev ./scripts/list_tkr_version.sh`
