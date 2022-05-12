@@ -30,16 +30,8 @@ References:
 Use the following bash [script](scripts/install.sh) to perform the following operations:
 
 - Install the tanzu client 
-- Create an [unmanaged](https://tanzucommunityedition.io/docs/v0.11/getting-started-unmanaged/#getting-started-with-unmanaged-clusters) kubernetes cluster 
-- Deploy some cool packages able to demo a GitOps scenario such as:
-  - Certificate manager,
-  - Kpack,
-  - Knative, 
-  - Contour, 
-  - Cartographer, 
-  - FluxCD, 
-  - Kubernetes dashboard
-  - Harbor (optional)
+- Create an [unmanaged](https://tanzucommunityedition.io/docs/v0.12/getting-started-unmanaged/#getting-started-with-unmanaged-clusters) kubernetes cluster 
+- Deploy some cool packages able to demo a GitOps scenario
 
 **NOTE**: Before to execute the installation, verify first if the Tanzu Kubernetes Release version (or TKR) is compatible with the TCE version using the [list_tkr_version.sh](./scripts/list_tkr_version.sh) script.
 Pass the TCE version as parameter `TCE_VERSION=dev ./scripts/list_tkr_version.sh`
@@ -50,7 +42,7 @@ Execute the `./scripts/install.sh` where you will set the following variables:
 - **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
 - **CLUSTER_NAME**: TCE Kind cluster name
 - **TCE_VERSION**: Version of the Tanzu client to be installed. (e.g.: v0.12.0)
-- **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. (e.g.: v1.22.5)
+- **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. (e.g.: v1.22.7-2)
 - **REGISTRY_SERVER**: Container image registry (e.g: docker.io, ghcr.io, ...)
 - **REGISTRY_OWNER**: Username of the account, github org used to access the Registry server
 - **REGISTRY_USERNAME**: Registry account username
@@ -108,8 +100,7 @@ REMOTE_HOME_DIR=<LOCAL_OR_REMOTE_HOME_DIR> VM_IP=<VM_IP> CLUSTER_NAME="toto" ./s
 
 ### Manual steps
 
-Install TCE and download a version `>= 0.11` or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build) as it supports to install now: cartographer, kpack
-and more will come soon: FluxCD, kubeapps, ...
+Install TCE using a [released version](https://tanzucommunityedition.io/docs/v0.12/cli-installation/) or a [snapshot](https://github.com/vmware-tanzu/community-edition#latest-daily-build)
 
 ```bash
 mkdir tce && cd tce/
@@ -125,7 +116,7 @@ printf "\n# Tanzu shell completion\nsource '$HOME/.tanzu/completion.bash.inc'\n"
 
 ### Create a K8s cluster
 
-Create the TCE unmanaged cluster (= Kind cluster) and install the needed packages
+Create the TCE unmanaged cluster (= Kind cluster)
 ```bash
 tanzu uc delete toto
 tanzu uc create toto -p 80:80 -p 443:443
@@ -133,42 +124,45 @@ tanzu uc create toto -p 80:80 -p 443:443
 
 ### Configure/install the needed packages
 
-As FluxCD is not yet packaged/proposed by TCE, it is then needed to install it separately
+Install the needed packages
 ```bash
-brew install fluxcd/tap/flux
-flux check --pre
-```
+TCE_DIR=tce
 
-Create now the `tce` namespace and configure/install the needed packages
-```bash
-IP=65.108.148.216
-kc create ns tce
-tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:v0.12.0-alpha.1 --namespace tanzu-package-repo-global
-flux install --namespace=flux-system --network-policy=false --components=source-controller
-tanzu package install cert-manager --package-name cert-manager.community.tanzu.vmware.com --version 1.6.1 -n tce --wait=false
+tanzu package install secretgen-controller --package-name secretgen-controller.community.tanzu.vmware.com --version 0.7.1 -n tkg-system
 
-cat <<EOF > $HOME/tce/values-contour.yaml
-envoy:
-  service:
-    type: ClusterIP
-  hostPorts:
-    enable: true
+IP="<IP_OF_THE_VM>"
+REGISTRY_SERVER="<ghcr.io or docker.io or>"
+REGISTRY_OWNER="<docker username or github org>"
+REGISTRY_USERNAME="<docker account or github username>"
+REGISTRY_PASSWORD="<docker password or github token>"
+tanzu secret registry add registry-credentials --server ghcr.io --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --export-to-all-namespaces`
+
+cat <<EOF > $TCE_DIR/app-toolkit-values.yml
+contour:
+  envoy:
+    service:
+      type: ClusterIP
+    hostPorts:
+      enable: true
+knative_serving:
+  domain:
+    type: real
+    name: ${IP}.nip.io
+kpack:
+  kp_default_repository: "$REGISTRY_SERVER/$REGISTRY_OWNER/build-service"
+  kp_default_repository_username: "$REGISTRY_USERNAME"
+  kp_default_repository_password: "$REGISTRY_PASSWORD"
+cartographer-catalog:
+  registry:
+      server: $REGISTRY_SERVER
+      repository: $REGISTRY_OWNER
 EOF
-tanzu package install contour --package-name contour.community.tanzu.vmware.com --version 1.20.1 -f $HOME/tce/values-contour.yaml --wait=false
-
-cat <<EOF > $HOME/tce/values-knative.yml
-domain:
-  type: real
-  name: $IP.nip.io
-EOF
-tanzu package install knative --package-name knative-serving.community.tanzu.vmware.com --version 1.0.0 -f $HOME/tce/values-knative.yml --wait=false
-tanzu package install kpack --package-name kpack.community.tanzu.vmware.com --version 0.5.1 --wait=false
-tanzu package install cartographer --package-name cartographer.community.tanzu.vmware.com --version 0.2.2 --wait=false
+tanzu package install app-toolkit --package-name app-toolkit.community.tanzu.vmware.com --version 0.2.0 -f $TCE_DIR/app-toolkit-values.yml -n tanzu-package-repo-global
 ```
 
 ## Demo
 
-We will now use the cartographer and a simple supply-chain [example](https://github.com/vmware-tanzu/cartographer/blob/main/examples/basic-sc/README.md) to build an image from the source and next deploy a knative service
+We will now use to build an image from the source and next deploy a knative service
 ```bash
 git clone https://github.com/vmware-tanzu/cartographer.git
 pushd $HOME/tce/cartographer/examples/basic-sc/
@@ -215,7 +209,9 @@ kapp delete -a example
 kapp delete -a supplychain
 ```
 
-## Install, upgrade needed tools (optional)
+## Optional
+
+### Install, upgrade needed tools
 
 Install or upgrade tools on Centos7
 ```bash
@@ -281,7 +277,7 @@ brew install imgpkg
 brew install crane
 ```
 
-## Install the K8s dashboard (optional)
+### Install the K8s dashboard (optional)
 
 Setup the Issuer & Certificate resources used by the certificate Manager to generate a selfsigned certificate and dnsNames `k8s-ui.$IP.nip.io` using Letscencrypt.
 The secret name `k8s-ui-secret` referenced by the Certificate resource will be filled by the Certificate Manager and next used by the Ingress TLS endpoint

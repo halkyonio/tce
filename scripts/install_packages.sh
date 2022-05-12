@@ -29,35 +29,34 @@ REGISTRY_PASSWORD=${REGISTRY_PASSWORD}
 
 TCE_DIR=$REMOTE_HOME_DIR/tce
 TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
+TCE_CORE_PACKAGES_NAMESPACE=tkg-system
 
 DIR=`dirname $0` # to get the location where the script is located
 
 . $DIR/util.sh
-
-log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
-export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
 
 SECONDS=0
 
 log "CYAN" "Install the repository containing the kubernetes dashboard package"
 tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
 
-log "CYAN" "Create for all the namespaces the registry credentials secret"
+log "CYAN" "Install first the mandatory packages: secregen-controller"
+# for pkg in secretgen-controller:secretgen-controller.community.tanzu.vmware.com:0.7.1:$TCE_CORE_PACKAGES_NAMESPACE
+# do
+#   IFS=':' read -ra param <<< "$pkg"
+#   log "CYAN" "Deploy package: ${param[0]} - ${param[1]} - ${param[2]} from repo namespace: ${param[3]}"
+#   tanzu package install ${param[0]} --package-name ${param[1]} --version ${param[2]} -n ${param[3]}
+# done
+tanzu package install secretgen-controller -p secretgen-controller.community.tanzu.vmware.com -v 0.7.1 -n $TCE_CORE_PACKAGES_NAMESPACE
+
+log "CYAN" "Create and export to all the namespaces the registry credentials secret"
 tanzu secret registry add registry-credentials --server ghcr.io --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --export-to-all-namespaces -y
 
 log "CYAN" "Got the latest version of the packages to be installed ..."
 declare -A packages
-packages[1,0]="cert-manager"
-packages[1,1]="cert-manager.community.tanzu.vmware.com"
-packages[1,2]=""
-
-packages[2,0]="secretgen-controller"
-packages[2,1]="secretgen-controller.community.tanzu.vmware.com"
-packages[2,2]=""
-
-packages[3,0]="app-toolkit"
-packages[3,1]="app-toolkit.community.tanzu.vmware.com"
-packages[3,2]="YES"
+packages[1,0]="app-toolkit"
+packages[1,1]="app-toolkit.community.tanzu.vmware.com"
+packages[1,2]="YES"
 cat <<EOF > $TCE_DIR/values-app-toolkit.yml
 contour:
   envoy:
@@ -84,16 +83,16 @@ cartographer_catalog:
 developer_namespace: demo
 EOF
 
-packages[4,0]="k8s-ui"
-packages[4,1]="kubernetes-dashboard.halkyonio.io"
-packages[4,2]="YES"
+packages[2,0]="k8s-ui"
+packages[2,1]="kubernetes-dashboard.halkyonio.io"
+packages[2,2]="YES"
 cat <<EOF > $TCE_DIR/values-k8s-ui.yml
 vm_ip: $VM_IP
 EOF
 
-for ((i=1;i<=7;i++)) do
+for ((i=1;i<=2;i++)) do
         PKG_NAME=${packages[$i,1]}
-        jsonBody=`tanzu package available list -o json`
+        jsonBody=`tanzu package available list -A -o json`
         PKG_VERSION=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."latest-version"'`
         PKG_SHORT_NAME=`echo $jsonBody | jq -r '.[] | select(.name == "'"$PKG_NAME"'")."display-name"'`
         packages[$i,3]=$PKG_VERSION
