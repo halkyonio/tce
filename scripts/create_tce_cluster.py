@@ -27,7 +27,7 @@ def usage():
 -p --path : (Remote) home directory (e.g /home/snowdrop)
 -i --ip   : IP address of the machine or remote VM (e.g 65.108.148.216)
 -n --name : TCE Cluster name (e.g toto)
--t --tce  : TCE Version (e.g: v0.11.0)
+-t --tce  : TCE Version (e.g: v0.12.0)
 -r --tkr  : TKE (Kubernetes) Version (e.g: v1.22.5)
 -k --port : Kubernetes API Port (e.g: 31452)
 -h --help : This help.
@@ -35,7 +35,7 @@ def usage():
 
 def main(argv):
     remoteHomeDir = vmIP = clusterName = ''
-    tceVersion = "v0.11.0"
+    tceVersion = "v0.12.0"
     tkrVersion = "v1.22.5"
     remoteK8sPort = "31452"
     tceDir = ''

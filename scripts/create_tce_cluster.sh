@@ -13,22 +13,20 @@
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM (e.g /home/snowdrop)
 # - VM_IP: IP address of the VM where the cluster is running (e.g 10.1.1.2)
 # - CLUSTER_NAME: TCE Kind cluster name (e.g toto)
-# - TCE_VERSION: Version of the Tanzu client to be installed. (e.g. v0.11.0)
+# - TCE_VERSION: Version of the Tanzu client to be installed. (e.g. v0.12.0)
 # - TKR_VERSION: kubernetes version which corresponds to the Tanzu Kind Node TCE image. (e.g v1.22.5)
 # - REMOTE_K8S_PORT: Remote port to access the Kubernetes API Server (e.g. 31452)
 #
 set -e
 
-KUBE_CFG=${KUBE_CFG:=config}
 VM_IP=${VM_IP:=127.0.0.1}
 CLUSTER_NAME=${CLUSTER_NAME:=toto}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 REMOTE_K8S_PORT=${REMOTE_K8S_PORT:-31452}
 
-TCE_VERSION=${TCE_VERSION:-v0.11.0}
-TKR_VERSION=${TKR_VERSION:-v1.22.5}
+TCE_VERSION=${TCE_VERSION:-v0.12.0}
+TKR_VERSION=${TKR_VERSION:-v1.22.7}
 TCE_DIR=$REMOTE_HOME_DIR/tce
-TCE_PACKAGES_NAMESPACE=tanzu-package-repo-global
 
 #display_usage() {
 #	echo "Execute this script ./create_tce_cluster.sh"
@@ -82,20 +80,6 @@ repeat(){
 	for i in $range ; do echo -n "${str}"; done
 }
 
-log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
-export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
-
-log "CYAN" "Install the tanzu client version: $TCE_VERSION"
-curl -H "Accept: application/vnd.github.v3.raw" \
-    -L https://api.github.com/repos/vmware-tanzu/community-edition/contents/hack/get-tce-release.sh | \
-    bash -s $TCE_VERSION linux
-mv tce-linux-amd64-$TCE_VERSION.tar.gz $TCE_DIR
-tar xzvf $TCE_DIR/tce-linux-amd64-$TCE_VERSION.tar.gz -C $TCE_DIR/
-$TCE_DIR/tce-linux-amd64-$TCE_VERSION/install.sh
-
-mkdir -p $REMOTE_HOME_DIR/.tanzu
-tanzu completion bash >  $REMOTE_HOME_DIR/.tanzu/completion.bash.inc
-
 log "CYAN" "Configure the TCE cluster config file: $TCE_DIR/config.yml"
 cat <<EOF > $TCE_DIR/config.yml
 ClusterName: $CLUSTER_NAME
@@ -132,9 +116,6 @@ EOF
 
 log "CYAN" "Create the $CLUSTER_NAME TCE cluster"
 tanzu uc create $CLUSTER_NAME -f $TCE_DIR/config.yml
-
-log "CYAN" "Install our demo repository containing the kubernetes dashboard package"
-tanzu package repository add demo-repo --url ghcr.io/halkyonio/packages/demo-repo:0.1.0 -n $TCE_PACKAGES_NAMESPACE
 
 sleep 10s
 

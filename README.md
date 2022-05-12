@@ -46,14 +46,14 @@ Execute this `install.sh` where you will first set the following variables:
 - **REMOTE_HOME_DIR**: home directory where files will be installed locally or within the remote VM
 - **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
 - **CLUSTER_NAME**: TCE Kind cluster name
-- **TCE_VERSION**: Version of the Tanzu client to be installed. E.g. v0.11.0
+- **TCE_VERSION**: Version of the Tanzu client to be installed. E.g. v0.12.0
 - **TKR_VERSION**: kubernetes version which corresponds to the Tanzu Kind Node TCE image. E.G. v1.22.5
 
 ```bash
 REMOTE_HOME_DIR="$HOME" \
 VM_IP="127.0.0.1" \
 CLUSTER_NAME="toto" \
-TCE_VERSION="v0.11.0" \
+TCE_VERSION="v0.12.0" \
 TKR_VERSION="v0.21.2" \
 ./scripts/install.sh
 
@@ -63,7 +63,7 @@ ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} \
     REMOTE_HOME_DIR="/home/centos" \
     VM_IP=${IP} \
     CLUSTER_NAME="toto" \
-    TCE_VERSION="v0.11.0" \
+    TCE_VERSION="v0.12.0" \
     TKR_VERSION="v0.21.2" \
     "bash -s" -- < ./scripts/install.sh
 ```
@@ -84,7 +84,7 @@ and more will come soon: FluxCD, kubeapps, ...
 
 ```bash
 mkdir tce && cd tce/
-TCE_OS_VERSION="tce-linux-amd64-v0.11.0-dev.1"
+TCE_OS_VERSION="tce-linux-amd64-v0.12.0-dev.1"
 wget https://storage.googleapis.com/tce-cli-plugins-staging/build-daily/2022-03-08/$TCE_OS_VERSION.tar.gz
 ./install.sh
 
@@ -114,7 +114,7 @@ Create now the `tce` namespace and configure/install the needed packages
 ```bash
 IP=65.108.148.216
 kc create ns tce
-tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:v0.11.0-alpha.1 --namespace tanzu-package-repo-global
+tanzu package repository update community-repository --url projects.registry.vmware.com/tce/main:v0.12.0-alpha.1 --namespace tanzu-package-repo-global
 flux install --namespace=flux-system --network-policy=false --components=source-controller
 tanzu package install cert-manager --package-name cert-manager.community.tanzu.vmware.com --version 1.6.1 -n tce --wait=false
 

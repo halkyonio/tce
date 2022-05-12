@@ -9,50 +9,18 @@
 #
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
-# - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.11.0
+# - TCE_VERSION: Version of the Tanzu client to be installed. E.g. v0.12.0
 #
 set -e
 
-KUBE_CFG=${KUBE_CFG:=config}
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 
 TCE_VERSION=${TCE_VERSION:-v0.12.0}
 TCE_DIR=$REMOTE_HOME_DIR/tce
 
-# Defining some colors for output
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-YELLOW='\033[0;33m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[0;37m'
+DIR=`dirname $0` # to get the location where the script is located
 
-repeat_char(){
-  COLOR=${1}
-	for i in {1..50}; do echo -ne "${!COLOR}$2${NC}"; done
-}
-
-log_msg() {
-    COLOR=${1}
-    MSG="${@:2}"
-    echo -e "\n${!COLOR}## ${MSG}${NC}"
-}
-
-log_line() {
-    COLOR=${1}
-    MSG="${@:2}"
-    echo -e "${!COLOR}## ${MSG}${NC}"
-}
-
-log() {
-  MSG="${@:2}"
-  echo; repeat_char ${1} '#'; log_msg ${1} ${MSG}; repeat_char ${1} '#'; echo
-}
-
-log "CYAN" "Set the KUBECONFIG=$HOME/.kube/${KUBE_CFG}"
-export KUBECONFIG=$HOME/.kube/${KUBE_CFG}
+. $DIR/util.sh
 
 SECONDS=0
 
