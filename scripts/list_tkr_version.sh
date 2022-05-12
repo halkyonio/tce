@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+#
+# This script requires: curl, grep, sed, tr, and jq in order to work
+#
+# Execute this command locally
+#
+# ./list_tkr_version.sh
+#
+# Example:
+# TCE_VERSION=dev ./scripts/list_tkr_version.sh
+#
+# Define the following env vars:
+# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
+# - TCE_VERSION: Version of TCE used to check the TKG version compatibles
 
 REMOTE_HOME_DIR=${REMOTE_HOME_DIR:-$HOME}
 TCE_VERSION=${TCE_VERSION:-v0.12.0}

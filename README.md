@@ -41,7 +41,10 @@ Use the following bash [script](scripts/install.sh) to perform the following ope
   - Kubernetes dashboard
   - Harbor (optional)
 
-Execute this `install.sh` where you will first set the following variables:
+**NOTE**: Before to execute the installation, verify first if the Tanzu Kubernetes Release version (or TKR) is compatible with the TCE version using the [list_tkr_version.sh](./scripts/list_tkr_version.sh) script.
+Pass the TCE version as parameter `TCE_VERSION=dev ./scripts/list_tkr_version.sh`
+
+Execute the `./scripts/install.sh` where you will set the following variables:
 
 - **REMOTE_HOME_DIR**: home directory where files will be installed locally or within the remote VM
 - **VM_IP**: IP address of the VM where the cluster is running (e.g.: 127.0.0.1)
