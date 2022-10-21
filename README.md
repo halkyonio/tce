@@ -1,5 +1,6 @@
 # Tanzu Community Edition
 
+* [Warning](#warning)
 * [Introduction](#introduction)
 * [TCE installation](#tce-installation)
   * [All in one](#all-in-one)
@@ -8,6 +9,10 @@
     * [Create a K8s cluster](#create-a-k8s-cluster)
     * [Configure/install the needed packages](#configureinstall-the-needed-packages)
 * [Demo](#demo)
+
+## Warning
+
+This project has been archived as Tanzu Community Edition OSS project is EOL (December 2022) and been replaced by TKG !
 
 ## Introduction
 
